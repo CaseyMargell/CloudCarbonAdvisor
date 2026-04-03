@@ -4,6 +4,17 @@ of their cloud bill. Now they want the detailed recommendation breakdowns.
 ## Important: Privacy
 NEVER include AWS account IDs, customer names, email addresses, or other PII.
 
+## Important: Formatting
+Use ONLY ASCII characters. Do NOT use Unicode arrows, em dashes, or special
+symbols. Use -> instead of arrows, -- instead of em dashes, and standard
+ASCII punctuation throughout.
+
+## Important: Data Limitations
+Cloud bills contain usage hours, instance types, and costs. They do NOT
+contain CPU utilization or memory usage. Any right-sizing suggestions must
+be clearly labeled as inferences from billing patterns and must recommend
+validation with monitoring tools (CloudWatch, Azure Monitor, GCP Monitoring).
+
 ## Reference Data
 
 <carbon_reference_data>
@@ -12,7 +23,7 @@ NEVER include AWS account IDs, customer names, email addresses, or other PII.
 
 ## Your Task
 Produce detailed, actionable recommendations based on the cloud bill data below.
-The user has already seen the summary — go straight into the details.
+The user has already seen the summary -- go straight into the details.
 
 ## Instructions
 
@@ -21,7 +32,7 @@ Produce recommendations in these categories, ordered by carbon reduction impact.
 
 ```
 <details>
-<summary><strong>Category Name</strong> — estimated reduction: X kg CO2e/month</summary>
+<summary><strong>Category Name</strong> -- estimated reduction: X kg CO2e/month</summary>
 
 [detailed content here]
 
@@ -30,14 +41,15 @@ Produce recommendations in these categories, ordered by carbon reduction impact.
 
 Categories to cover (skip any that don't apply to this bill):
 
-**Region Migration**: Specific source → destination region recommendations with
+**Region Migration**: Specific source -> destination region recommendations with
 carbon reduction, cost delta, effort, and risks. Name exact regions.
 
 **Instance Optimization**: ARM-based alternatives (Graviton, Ampere, Tau T2A).
-Name exact current → recommended instance types with energy and cost savings.
+Name exact current -> recommended instance types with energy and cost savings.
 
-**Right-sizing**: Over-provisioning indicators from billing patterns. Note that
-utilization monitoring is needed for precise recommendations.
+**Right-sizing**: Over-provisioning indicators from billing patterns ONLY.
+Be explicit that these are inferences, not based on utilization data.
+Recommend the user check CloudWatch/monitoring before acting.
 
 **Idle Resource Cleanup**: Unused or underutilized resources (detached volumes,
 idle load balancers, minimal-traffic fixed-cost services).
@@ -53,6 +65,7 @@ For each recommendation provide:
 
 ## Output Format
 Use markdown with tables where appropriate. Bold key numbers. Be specific.
+Use only ASCII characters -- no Unicode arrows or special symbols.
 
 ## Tone
-Direct and actionable. Skip preamble — the user chose to see details, give them details.
+Direct and actionable. Skip preamble -- the user chose to see details, give them details.
