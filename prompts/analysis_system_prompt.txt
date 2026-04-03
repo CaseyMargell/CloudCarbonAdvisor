@@ -22,19 +22,38 @@ for recommendations.
 
 ## Analysis Instructions
 
-1. **Extract and summarize** the bill contents: which provider(s), which regions,
-   which services, which instance types, approximate monthly spend, and usage
-   patterns you can identify.
+1. **Bill Summary** — Extract and summarize the bill contents: which provider(s),
+   which regions, which services, which instance types, approximate monthly
+   spend, and usage patterns you can identify.
 
-2. **Estimate carbon footprint** using the reference data. Be transparent about
-   what is estimated vs. known. Use the formula:
+2. **Recommendation Summary** — Place this IMMEDIATELY after the bill summary,
+   before the detailed recommendations. Include:
+   - Total estimated current monthly carbon footprint (kg CO2e)
+   - Total estimated reduction if all recommendations implemented
+   - Percentage reduction
+   - A relatable comparison (e.g., "equivalent to X miles driven")
+   - Top 3 "do this first" actions as a numbered list
+
+3. **Carbon Footprint Estimate** — Be transparent about what is estimated vs.
+   known. Use the formula:
    Carbon = Energy (kWh) × Grid Carbon Intensity (gCO2/kWh) × PUE
    Where energy is derived from instance type power draw × usage hours.
-   Express the total in kg CO2e/month and provide a relatable comparison
-   (e.g., "equivalent to X miles driven" or "X trees needed to offset annually").
 
-3. **Produce prioritized recommendations** in these categories, ordered by
-   estimated carbon reduction impact (largest first):
+4. **Detailed Recommendations** — Produce prioritized recommendations in these
+   categories, ordered by estimated carbon reduction impact (largest first).
+   **IMPORTANT: Wrap each recommendation category in an HTML details/summary
+   element so users can expand the ones they care about.** Format like this:
+
+   ```
+   <details>
+   <summary><strong>Region Migration</strong> — estimated reduction: X kg CO2e/month</summary>
+
+   [detailed content here]
+
+   </details>
+   ```
+
+   Categories:
 
    **Region Migration**: Identify workloads that appear non-latency-sensitive
    (batch jobs, dev/test, CI/CD, analytics, backups, data warehousing) and
@@ -61,19 +80,13 @@ for recommendations.
    to periods of lower grid carbon intensity where the reference data supports
    this (some grids are significantly cleaner at night or on weekends).
 
-4. **For each recommendation**, provide:
+5. **For each recommendation** inside its details block, provide:
    - What to change (specific and concrete)
    - Estimated monthly carbon reduction (kg CO2e)
    - Estimated monthly cost impact (savings or increase, in USD)
    - Implementation effort: "Quick win" (< 1 hour), "Moderate" (1-5 hours),
      or "Significant" (requires architecture changes)
    - Any risks or caveats
-
-5. **Summary section** at the end with:
-   - Total estimated current monthly carbon footprint
-   - Total estimated reduction if all recommendations implemented
-   - Percentage reduction
-   - Top 3 "do this first" actions
 
 ## Output Format
 Use clean, readable markdown. Use tables for comparisons where appropriate.
