@@ -231,56 +231,74 @@
         var decoder = new TextDecoder();
         var buffer = '';        // SSE line buffer
         var accumulated = '';   // Full markdown so far
-        var sections = [];      // Array of {header, markdown, el}
-        var currentSection = null;
-        var progressEl = null;  // Current "Generating..." indicator
+        // Section tracking: we scan accumulated text for ## headers
+        // to split into stable rendered sections. Unlike the old approach
+        // (splitting chunks by \n), this works on the full text so markdown
+        // formatting that spans chunk boundaries renders correctly.
+        var renderedUpTo = 0;    // How many chars of accumulated we've assigned to sections
+        var sections = [];       // Array of {el, startIdx}
+        var progressEl = null;
         var renderPending = false;
 
-        function createProgressIndicator(label) {
-            // Remove previous indicator
+        function createProgressIndicator(label, container) {
             if (progressEl) progressEl.remove();
             progressEl = document.createElement('div');
             progressEl.className = 'section-progress';
             progressEl.innerHTML = earthSpinner + ' <span>' + label + '...</span>';
-            resultsContent.appendChild(progressEl);
+            (container || resultsContent).appendChild(progressEl);
             progressEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        function finalizeSection() {
-            // Render the current section's markdown into its element
-            if (currentSection && currentSection.el) {
-                currentSection.el.innerHTML = DOMPurify.sanitize(marked.parse(currentSection.markdown));
+        function scanAndRender() {
+            // Find all section boundaries (lines starting with # or ##) in accumulated text
+            var headerPattern = /\n(#{1,2}\s+\S[^\n]*)/g;
+            var match;
+            var boundaries = [];
+            while ((match = headerPattern.exec(accumulated)) !== null) {
+                boundaries.push({ idx: match.index + 1, header: match[1] }); // +1 to skip the \n
             }
-        }
+            // Also check if the text starts with a header (no leading \n)
+            if (/^#{1,2}\s+\S/.test(accumulated)) {
+                var firstLine = accumulated.split('\n')[0];
+                boundaries.unshift({ idx: 0, header: firstLine });
+            }
 
-        function renderCurrentSection() {
-            if (!renderPending && currentSection && currentSection.el) {
+            // For each boundary we haven't processed yet, finalize the previous section
+            // and create a new one
+            for (var i = 0; i < boundaries.length; i++) {
+                var b = boundaries[i];
+                if (b.idx <= renderedUpTo) continue; // Already processed
+
+                // Finalize previous section with text up to this boundary
+                if (sections.length > 0) {
+                    var prev = sections[sections.length - 1];
+                    var prevMarkdown = accumulated.substring(prev.startIdx, b.idx);
+                    prev.el.innerHTML = DOMPurify.sanitize(marked.parse(prevMarkdown));
+                }
+
+                // Create new section
+                var el = document.createElement('div');
+                el.className = 'result-section';
+                resultsContent.appendChild(el);
+                sections.push({ el: el, startIdx: b.idx });
+
+                // Update progress indicator
+                var headerText = b.header.replace(/^#+\s*/, '').trim();
+                createProgressIndicator(getLabelForHeader(headerText));
+
+                renderedUpTo = b.idx;
+            }
+
+            // Render the current (last) in-progress section
+            if (sections.length > 0 && !renderPending) {
                 renderPending = true;
                 requestAnimationFrame(function() {
-                    currentSection.el.innerHTML = DOMPurify.sanitize(marked.parse(currentSection.markdown));
+                    var curr = sections[sections.length - 1];
+                    var currMarkdown = accumulated.substring(curr.startIdx);
+                    curr.el.innerHTML = DOMPurify.sanitize(marked.parse(currMarkdown));
                     renderPending = false;
                 });
             }
-        }
-
-        function startNewSection(headerLine) {
-            // Finalize previous section
-            finalizeSection();
-
-            // Extract header text (remove ## prefix)
-            var headerText = headerLine.replace(/^#+\s*/, '').trim();
-            var label = getLabelForHeader(headerText);
-
-            // Create DOM element for this section
-            var el = document.createElement('div');
-            el.className = 'result-section';
-            resultsContent.appendChild(el);
-
-            currentSection = { header: headerText, markdown: headerLine + '\n', el: el };
-            sections.push(currentSection);
-
-            // Show progress for next section
-            createProgressIndicator(label);
         }
 
         // Initial progress indicator
@@ -307,22 +325,15 @@
 
                         } else if (eventType === 'chunk' && data.content) {
                             accumulated += data.content;
-
-                            var chunkLines = data.content.split('\n');
-                            for (var j = 0; j < chunkLines.length; j++) {
-                                var cl = chunkLines[j];
-                                if (/^#{1,2}\s+\S/.test(cl.trim())) {
-                                    startNewSection(cl.trim());
-                                } else if (currentSection) {
-                                    currentSection.markdown += cl + '\n';
-                                }
-                            }
-                            renderCurrentSection();
+                            scanAndRender();
 
                         } else if (eventType === 'done') {
-                            finalizeSection();
+                            // Final render of last section
+                            if (sections.length > 0) {
+                                var last = sections[sections.length - 1];
+                                last.el.innerHTML = DOMPurify.sanitize(marked.parse(accumulated.substring(last.startIdx)));
+                            }
                             if (progressEl) progressEl.remove();
-                            // Show details button, static footer, and action buttons
                             if (cachedBillText) detailsCta.classList.remove('hidden');
                             staticFooter.classList.remove('hidden');
                             resultsActions.classList.remove('hidden');
@@ -369,77 +380,83 @@
             return;
         }
 
-        // Stream details with the same section-by-section rendering
-        var reader = response.body.getReader();
-        var decoder = new TextDecoder();
-        var buffer = '', accumulated = '';
-        var currentSection = null, progressEl = null, renderPending = false;
+        // Stream details — same scanAndRender pattern as summary
+        var dReader = response.body.getReader();
+        var dDecoder = new TextDecoder();
+        var dBuffer = '', dAccumulated = '';
+        var dSections = [], dRenderedUpTo = 0, dRenderPending = false;
+        var dProgressEl = null;
 
-        function createProgress(label) {
-            if (progressEl) progressEl.remove();
-            progressEl = document.createElement('div');
-            progressEl.className = 'section-progress';
-            progressEl.innerHTML = earthSpinner + ' <span>' + label + '...</span>';
-            detailsContent.appendChild(progressEl);
-            progressEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        function dCreateProgress(label) {
+            if (dProgressEl) dProgressEl.remove();
+            dProgressEl = document.createElement('div');
+            dProgressEl.className = 'section-progress';
+            dProgressEl.innerHTML = earthSpinner + ' <span>' + label + '...</span>';
+            detailsContent.appendChild(dProgressEl);
+            dProgressEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        function finalizeDetailSection() {
-            if (currentSection && currentSection.el) {
-                currentSection.el.innerHTML = DOMPurify.sanitize(marked.parse(currentSection.markdown));
+        function dScanAndRender() {
+            var headerPattern = /\n(#{1,2}\s+\S[^\n]*)/g;
+            var match, boundaries = [];
+            while ((match = headerPattern.exec(dAccumulated)) !== null) {
+                boundaries.push({ idx: match.index + 1, header: match[1] });
             }
-        }
-
-        function renderDetailSection() {
-            if (!renderPending && currentSection && currentSection.el) {
-                renderPending = true;
+            if (/^#{1,2}\s+\S/.test(dAccumulated)) {
+                boundaries.unshift({ idx: 0, header: dAccumulated.split('\n')[0] });
+            }
+            for (var i = 0; i < boundaries.length; i++) {
+                var b = boundaries[i];
+                if (b.idx <= dRenderedUpTo) continue;
+                if (dSections.length > 0) {
+                    var prev = dSections[dSections.length - 1];
+                    prev.el.innerHTML = DOMPurify.sanitize(marked.parse(dAccumulated.substring(prev.startIdx, b.idx)));
+                }
+                var el = document.createElement('div');
+                el.className = 'result-section';
+                detailsContent.appendChild(el);
+                dSections.push({ el: el, startIdx: b.idx });
+                var headerText = b.header.replace(/^#+\s*/, '').trim();
+                dCreateProgress(getLabelForHeader(headerText));
+                dRenderedUpTo = b.idx;
+            }
+            if (dSections.length > 0 && !dRenderPending) {
+                dRenderPending = true;
                 requestAnimationFrame(function() {
-                    currentSection.el.innerHTML = DOMPurify.sanitize(marked.parse(currentSection.markdown));
-                    renderPending = false;
+                    var curr = dSections[dSections.length - 1];
+                    curr.el.innerHTML = DOMPurify.sanitize(marked.parse(dAccumulated.substring(curr.startIdx)));
+                    dRenderPending = false;
                 });
             }
         }
 
-        function startDetailSection(headerLine) {
-            finalizeDetailSection();
-            var headerText = headerLine.replace(/^#+\s*/, '').trim();
-            var el = document.createElement('div');
-            el.className = 'result-section';
-            detailsContent.appendChild(el);
-            currentSection = { header: headerText, markdown: headerLine + '\n', el: el };
-            createProgress(getLabelForHeader(headerText));
-        }
-
-        createProgress('Generating detailed recommendations');
+        dCreateProgress('Generating detailed recommendations');
 
         while (true) {
-            var result = await reader.read();
-            if (result.done) break;
-            buffer += decoder.decode(result.value, { stream: true });
-            var lines = buffer.split('\n');
-            buffer = lines.pop();
-            var eventType = '';
-            for (var i = 0; i < lines.length; i++) {
-                var line = lines[i];
-                if (line.startsWith('event: ')) { eventType = line.slice(7).trim(); }
-                else if (line.startsWith('data: ')) {
+            var dResult = await dReader.read();
+            if (dResult.done) break;
+            dBuffer += dDecoder.decode(dResult.value, { stream: true });
+            var dLines = dBuffer.split('\n');
+            dBuffer = dLines.pop();
+            var dEventType = '';
+            for (var i = 0; i < dLines.length; i++) {
+                var dl = dLines[i];
+                if (dl.startsWith('event: ')) { dEventType = dl.slice(7).trim(); }
+                else if (dl.startsWith('data: ')) {
                     try {
-                        var data = JSON.parse(line.slice(6));
-                        if (eventType === 'chunk' && data.content) {
-                            accumulated += data.content;
-                            var chunkLines = data.content.split('\n');
-                            for (var j = 0; j < chunkLines.length; j++) {
-                                var cl = chunkLines[j];
-                                if (/^#{1,2}\s+\S/.test(cl.trim())) { startDetailSection(cl.trim()); }
-                                else if (currentSection) { currentSection.markdown += cl + '\n'; }
+                        var dd = JSON.parse(dl.slice(6));
+                        if (dEventType === 'chunk' && dd.content) {
+                            dAccumulated += dd.content;
+                            dScanAndRender();
+                        } else if (dEventType === 'done') {
+                            if (dSections.length > 0) {
+                                var last = dSections[dSections.length - 1];
+                                last.el.innerHTML = DOMPurify.sanitize(marked.parse(dAccumulated.substring(last.startIdx)));
                             }
-                            renderDetailSection();
-                        } else if (eventType === 'done') {
-                            finalizeDetailSection();
-                            if (progressEl) progressEl.remove();
-                        } else if (eventType === 'error') {
-                            if (progressEl) progressEl.remove();
-                            detailsContent.innerHTML += '<div class="stream-error">' + (data.message || 'Details generation was interrupted.') + '</div>';
+                            if (dProgressEl) dProgressEl.remove();
+                        } else if (dEventType === 'error') {
+                            if (dProgressEl) dProgressEl.remove();
+                            detailsContent.innerHTML += '<div class="stream-error">' + (dd.message || 'Details interrupted.') + '</div>';
                         }
                     } catch (e) {}
                 }

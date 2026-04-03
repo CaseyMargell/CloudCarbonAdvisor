@@ -352,7 +352,12 @@ a:hover { color: var(--teal-700); }
     height: 20px;
     color: var(--teal-600);
     flex-shrink: 0;
-    animation: spin 2s linear infinite;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.9); }
 }
 
 .result-section {
