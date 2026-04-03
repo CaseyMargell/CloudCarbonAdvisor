@@ -68,18 +68,21 @@ def format_sse(event: str, data: dict) -> str:
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "contact_url": config.CONTACT_URL,
-        "bmac_url": config.BMAC_URL,
-        "github_url": config.GITHUB_URL,
-        "max_file_size_mb": config.MAX_FILE_SIZE_MB,
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={
+            "contact_url": config.CONTACT_URL,
+            "bmac_url": config.BMAC_URL,
+            "github_url": config.GITHUB_URL,
+            "max_file_size_mb": config.MAX_FILE_SIZE_MB,
+        },
+    )
 
 
 @app.get("/sample", response_class=HTMLResponse)
 async def sample(request: Request):
-    return templates.TemplateResponse("sample.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="sample.html")
 
 
 @app.post("/api/analyze")
