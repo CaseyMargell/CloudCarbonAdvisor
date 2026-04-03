@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Upload your cloud bill and get actionable carbon reduction recommendations in 60 seconds. Free, private, no account needed.">
+    <title>Cloud Carbon Advisor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <style media="print">
+        #upload-section, #footer, .no-print { display: none !important; }
+        #results-section { margin: 0; padding: 0; }
+        body { background: white; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 py-4">
+        <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-xl font-semibold text-gray-900">Cloud Carbon Advisor</span>
+            </div>
+            <a href="/sample" class="text-sm text-teal-600 hover:text-teal-700 no-print">See a sample analysis</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
+        <!-- Upload Section -->
+        <div id="upload-section">
+            <div class="text-center mb-10">
+                <h1 class="text-3xl font-bold text-gray-900 mb-3">
+                    Upload your cloud bill. Get carbon reduction recommendations.
+                </h1>
+                <p class="text-gray-600 text-lg">
+                    Actionable insights to reduce your cloud infrastructure's carbon footprint.
+                </p>
+            </div>
+
+            <!-- Upload Form -->
+            <form id="upload-form" class="mb-10">
+                <div id="drop-zone"
+                     class="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer
+                            hover:border-teal-400 hover:bg-teal-50/50 transition-colors"
+                     role="button" tabindex="0" aria-label="Upload a cloud bill file">
+                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    <p class="text-lg font-medium text-gray-700 mb-1">
+                        Drag & drop your bill here, or <span class="text-teal-600">browse</span>
+                    </p>
+                    <p class="text-sm text-gray-500">
+                        AWS, Azure, or GCP bills — PDF or CSV (max 20MB)
+                    </p>
+                    <input type="file" id="file-input" accept=".pdf,.csv,.tsv" class="hidden">
+                </div>
+            </form>
+
+            <!-- How It Works -->
+            <div class="grid md:grid-cols-3 gap-6 mb-10">
+                <div class="text-center p-4">
+                    <div class="w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center mx-auto mb-3 font-semibold">1</div>
+                    <h3 class="font-medium text-gray-900 mb-1">Upload your bill</h3>
+                    <p class="text-sm text-gray-600">PDF or CSV export from any major cloud provider</p>
+                </div>
+                <div class="text-center p-4">
+                    <div class="w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center mx-auto mb-3 font-semibold">2</div>
+                    <h3 class="font-medium text-gray-900 mb-1">AI analyzes your usage</h3>
+                    <p class="text-sm text-gray-600">Regions, instance types, and services mapped to carbon data</p>
+                </div>
+                <div class="text-center p-4">
+                    <div class="w-10 h-10 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center mx-auto mb-3 font-semibold">3</div>
+                    <h3 class="font-medium text-gray-900 mb-1">Get actionable recommendations</h3>
+                    <p class="text-sm text-gray-600">Prioritized by carbon impact with cost estimates</p>
+                </div>
+            </div>
+
+            <!-- Privacy Note -->
+            <div class="bg-gray-100 rounded-lg p-4 text-center text-sm text-gray-600">
+                <svg class="w-4 h-4 inline-block mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+                Your bill is analyzed using Claude AI and immediately discarded. Neither we nor Anthropic store your data.
+            </div>
+        </div>
+
+        <!-- Processing Section (hidden by default) -->
+        <div id="processing-section" class="hidden text-center py-20">
+            <div class="spinner mx-auto mb-6"></div>
+            <h2 class="text-xl font-semibold text-gray-900 mb-2">Analyzing your bill...</h2>
+            <p class="text-gray-600">This typically takes 30–60 seconds.</p>
+        </div>
+
+        <!-- Results Section (hidden by default) -->
+        <div id="results-section" class="hidden">
+            <div id="results-content" class="prose prose-teal max-w-none" aria-live="polite"></div>
+            <div id="results-actions" class="hidden mt-8 flex gap-4 no-print">
+                <button onclick="window.print()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+                    Download as PDF
+                </button>
+                <a href="/" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    Start over
+                </a>
+            </div>
+        </div>
+
+        <!-- Error Section (hidden by default) -->
+        <div id="error-section" class="hidden text-center py-16">
+            <svg class="w-12 h-12 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+            <p id="error-message" class="text-gray-700 mb-4"></p>
+            <a href="/" class="text-teal-600 hover:text-teal-700">Start over</a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer" class="bg-white border-t border-gray-200 py-6 no-print">
+        <div class="max-w-4xl mx-auto px-4 text-center text-sm text-gray-500">
+            <p class="mb-2">This tool is free and open source. If it saved you time or helped reduce your carbon footprint:</p>
+            <div class="flex items-center justify-center gap-4">
+                {% if bmac_url %}
+                <a href="{{ bmac_url }}" target="_blank" rel="noopener" class="text-teal-600 hover:text-teal-700">Buy me a coffee</a>
+                {% endif %}
+                {% if contact_url %}
+                <a href="{{ contact_url }}" target="_blank" rel="noopener" class="text-teal-600 hover:text-teal-700">Need hands-on help?</a>
+                {% endif %}
+                {% if github_url %}
+                <a href="{{ github_url }}" target="_blank" rel="noopener" class="text-teal-600 hover:text-teal-700">GitHub</a>
+                {% endif %}
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    (function() {
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const uploadSection = document.getElementById('upload-section');
+        const processingSection = document.getElementById('processing-section');
+        const resultsSection = document.getElementById('results-section');
+        const resultsContent = document.getElementById('results-content');
+        const resultsActions = document.getElementById('results-actions');
+        const errorSection = document.getElementById('error-section');
+        const errorMessage = document.getElementById('error-message');
+
+        const MAX_SIZE = {{ max_file_size_mb }} * 1024 * 1024;
+
+        // Configure marked for safe rendering
+        marked.setOptions({ breaks: true, gfm: true });
+
+        // --- Drag and drop ---
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        dropZone.addEventListener('dragleave', function() {
+            dropZone.classList.remove('drag-over');
+        });
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        dropZone.addEventListener('click', function() { fileInput.click(); });
+        dropZone.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+        });
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length) handleFile(fileInput.files[0]);
+        });
+
+        // --- File handling ---
+        function handleFile(file) {
+            if (file.size > MAX_SIZE) {
+                showError('File too large. Maximum size is {{ max_file_size_mb }}MB.');
+                return;
+            }
+            uploadAndStream(file);
+        }
+
+        function showError(msg) {
+            uploadSection.classList.add('hidden');
+            processingSection.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+            errorSection.classList.remove('hidden');
+            errorMessage.textContent = msg;
+        }
+
+        // --- Upload + SSE streaming ---
+        async function uploadAndStream(file) {
+            uploadSection.classList.add('hidden');
+            processingSection.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+            errorSection.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            let response;
+            try {
+                response = await fetch('/api/analyze', { method: 'POST', body: formData });
+            } catch (err) {
+                showError('Network error. Please check your connection and try again.');
+                return;
+            }
+
+            // Handle non-streaming error responses
+            if (!response.ok) {
+                try {
+                    const data = await response.json();
+                    showError(data.error || 'Something went wrong. Please try again.');
+                } catch {
+                    showError('Something went wrong. Please try again.');
+                }
+                return;
+            }
+
+            // Switch to results view
+            processingSection.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+            resultsContent.innerHTML = '';
+            resultsActions.classList.add('hidden');
+
+            // Parse SSE stream
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            let accumulated = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // Keep incomplete line in buffer
+
+                let eventType = '';
+                for (const line of lines) {
+                    if (line.startsWith('event: ')) {
+                        eventType = line.slice(7).trim();
+                    } else if (line.startsWith('data: ')) {
+                        const dataStr = line.slice(6);
+                        try {
+                            const data = JSON.parse(dataStr);
+                            if (eventType === 'chunk' && data.content) {
+                                accumulated = data.content;
+                                resultsContent.innerHTML = marked.parse(accumulated);
+                            } else if (eventType === 'done') {
+                                resultsActions.classList.remove('hidden');
+                            } else if (eventType === 'error') {
+                                if (accumulated) {
+                                    resultsContent.innerHTML += '<div class="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">' +
+                                        (data.message || 'Analysis was interrupted.') + ' <a href="/" class="underline">Start over</a></div>';
+                                } else {
+                                    showError(data.message || 'Something went wrong. Please try again.');
+                                }
+                            }
+                        } catch (e) { /* skip malformed JSON */ }
+                    }
+                }
+            }
+        }
+    })();
+    </script>
+</body>
+</html>
