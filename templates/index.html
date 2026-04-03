@@ -69,7 +69,48 @@
 <!-- Results Section -->
 <div id="results-section" class="hidden">
     <div id="results-content" aria-live="polite"></div>
-    <div id="results-actions" class="hidden results-actions no-print">
+
+    <!-- Details button (shown after summary, before details are loaded) -->
+    <div id="details-cta" class="hidden" style="margin: 1.5rem 0;">
+        <button id="details-btn" class="btn-primary" style="width: 100%; padding: 0.75rem;">
+            Get detailed recommendation breakdowns
+        </button>
+        <p style="text-align: center; margin-top: 0.5rem; font-size: 0.8125rem; color: var(--gray-400);">
+            Region migration, instance optimization, right-sizing, idle cleanup — with specific actions and numbers
+        </p>
+    </div>
+
+    <!-- Details stream renders here -->
+    <div id="details-content" aria-live="polite"></div>
+
+    <!-- Static methodology + CTA (appended after summary, not LLM-generated) -->
+    <div id="static-footer" class="hidden" style="margin-top: 2rem;">
+        <hr style="border-color: var(--gray-200); margin: 1.5rem 0;">
+        <div style="font-size: 0.8125rem; color: var(--gray-500); line-height: 1.6;">
+            <p><strong>Methodology:</strong> Carbon intensity from EPA eGRID2023 and Cloud Carbon Footprint project.
+            Energy estimates based on Intel/AMD/Ampere TDP specs and cloud provider PUE values.
+            All estimates approximate ±20%. Right-sizing recommendations should be validated with monitoring data.
+            <a href="/faq">Learn more in our FAQ</a>.</p>
+        </div>
+        <div style="margin-top: 1.25rem; padding: 1rem; background: var(--teal-50); border: 1px solid var(--teal-200, #99f6e4); border-radius: 0.5rem; text-align: center;">
+            <p style="font-size: 0.9375rem; color: var(--gray-700); margin-bottom: 0.5rem;">
+                <strong>Make an even bigger impact</strong> — consider donating 20% of your monthly savings to plant trees.
+            </p>
+            <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+                {% if tree_donation_url %}
+                <a href="{{ tree_donation_url }}" target="_blank" rel="noopener" class="btn-primary" style="font-size: 0.875rem;">🌱 Plant trees</a>
+                {% endif %}
+                {% if bmac_url %}
+                <a href="{{ bmac_url }}" target="_blank" rel="noopener" class="btn-secondary" style="font-size: 0.875rem;">☕ Buy us a coffee</a>
+                {% endif %}
+            </div>
+            <p style="font-size: 0.75rem; color: var(--gray-400); margin-top: 0.5rem;">
+                This tool is free and open source. Donations help cover hosting and API costs.
+            </p>
+        </div>
+    </div>
+
+    <div id="results-actions" class="hidden results-actions no-print" style="margin-top: 1.5rem;">
         <button onclick="window.print()" class="btn-primary">Download as PDF</button>
         <a href="/" class="btn-secondary">Start over</a>
     </div>
@@ -96,31 +137,35 @@
     var resultsSection = document.getElementById('results-section');
     var resultsContent = document.getElementById('results-content');
     var resultsActions = document.getElementById('results-actions');
+    var detailsCta = document.getElementById('details-cta');
+    var detailsBtn = document.getElementById('details-btn');
+    var detailsContent = document.getElementById('details-content');
+    var staticFooter = document.getElementById('static-footer');
     var errorSection = document.getElementById('error-section');
     var errorMessage = document.getElementById('error-message');
 
     var MAX_SIZE = {{ max_file_size_mb }} * 1024 * 1024;
+    var cachedBillText = null; // Stored from context event for details call
 
     marked.setOptions({ breaks: true, gfm: true });
 
-    // --- Earth spinner SVG for progress indicators ---
     var earthSpinner = '<svg class="section-spinner" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
         '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" ' +
         'd="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
 
-    // Map markdown headers to friendly status messages
     var sectionLabels = {
         'bill summary': 'Summarizing your bill',
         'recommendation summary': 'Building recommendations overview',
-        'estimated carbon footprint': 'Estimating carbon footprint',
-        'carbon footprint estimate': 'Estimating carbon footprint',
-        'prioritized recommendations': 'Generating recommendations',
-        'detailed recommendations': 'Generating detailed recommendations',
+        'carbon footprint': 'Estimating carbon footprint',
+        'top actions': 'Identifying top actions',
         'implementation roadmap': 'Building implementation roadmap',
         'implementation priority': 'Building implementation roadmap',
-        'important caveats': 'Adding methodology notes',
-        'make an even bigger impact': 'Calculating your impact potential',
-        'total potential impact': 'Calculating total impact'
+        'region migration': 'Analyzing region migration options',
+        'instance optimization': 'Evaluating instance alternatives',
+        'right-sizing': 'Checking for right-sizing opportunities',
+        'idle resource': 'Scanning for idle resources',
+        'workload scheduling': 'Analyzing workload scheduling',
+        'database': 'Reviewing database optimization'
     };
 
     function getLabelForHeader(header) {
@@ -257,27 +302,29 @@
                 } else if (line.startsWith('data: ')) {
                     try {
                         var data = JSON.parse(line.slice(6));
-                        if (eventType === 'chunk' && data.content) {
+                        if (eventType === 'context' && data.bill_text) {
+                            cachedBillText = data.bill_text;
+
+                        } else if (eventType === 'chunk' && data.content) {
                             accumulated += data.content;
 
-                            // Check for new section headers in this chunk
                             var chunkLines = data.content.split('\n');
                             for (var j = 0; j < chunkLines.length; j++) {
                                 var cl = chunkLines[j];
                                 if (/^#{1,2}\s+\S/.test(cl.trim())) {
-                                    // New section detected
                                     startNewSection(cl.trim());
                                 } else if (currentSection) {
                                     currentSection.markdown += cl + '\n';
                                 }
                             }
-
-                            // Re-render only the current in-progress section
                             renderCurrentSection();
 
                         } else if (eventType === 'done') {
                             finalizeSection();
                             if (progressEl) progressEl.remove();
+                            // Show details button, static footer, and action buttons
+                            if (cachedBillText) detailsCta.classList.remove('hidden');
+                            staticFooter.classList.remove('hidden');
                             resultsActions.classList.remove('hidden');
 
                         } else if (eventType === 'error') {
@@ -296,6 +343,109 @@
             }
         }
     }
+
+    // --- Details button: second API call for detailed recommendations ---
+    detailsBtn.addEventListener('click', async function() {
+        if (!cachedBillText) return;
+
+        detailsCta.classList.add('hidden');
+        detailsContent.innerHTML = '';
+
+        var response;
+        try {
+            response = await fetch('/api/analyze/details', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bill_text: cachedBillText })
+            });
+        } catch (err) {
+            detailsContent.innerHTML = '<div class="stream-error">Network error loading details. <a href="/">Start over</a></div>';
+            return;
+        }
+
+        if (!response.ok) {
+            try { var errData = await response.json(); detailsContent.innerHTML = '<div class="stream-error">' + (errData.error || 'Failed to load details.') + '</div>'; }
+            catch (e) { detailsContent.innerHTML = '<div class="stream-error">Failed to load details.</div>'; }
+            return;
+        }
+
+        // Stream details with the same section-by-section rendering
+        var reader = response.body.getReader();
+        var decoder = new TextDecoder();
+        var buffer = '', accumulated = '';
+        var currentSection = null, progressEl = null, renderPending = false;
+
+        function createProgress(label) {
+            if (progressEl) progressEl.remove();
+            progressEl = document.createElement('div');
+            progressEl.className = 'section-progress';
+            progressEl.innerHTML = earthSpinner + ' <span>' + label + '...</span>';
+            detailsContent.appendChild(progressEl);
+            progressEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function finalizeDetailSection() {
+            if (currentSection && currentSection.el) {
+                currentSection.el.innerHTML = DOMPurify.sanitize(marked.parse(currentSection.markdown));
+            }
+        }
+
+        function renderDetailSection() {
+            if (!renderPending && currentSection && currentSection.el) {
+                renderPending = true;
+                requestAnimationFrame(function() {
+                    currentSection.el.innerHTML = DOMPurify.sanitize(marked.parse(currentSection.markdown));
+                    renderPending = false;
+                });
+            }
+        }
+
+        function startDetailSection(headerLine) {
+            finalizeDetailSection();
+            var headerText = headerLine.replace(/^#+\s*/, '').trim();
+            var el = document.createElement('div');
+            el.className = 'result-section';
+            detailsContent.appendChild(el);
+            currentSection = { header: headerText, markdown: headerLine + '\n', el: el };
+            createProgress(getLabelForHeader(headerText));
+        }
+
+        createProgress('Generating detailed recommendations');
+
+        while (true) {
+            var result = await reader.read();
+            if (result.done) break;
+            buffer += decoder.decode(result.value, { stream: true });
+            var lines = buffer.split('\n');
+            buffer = lines.pop();
+            var eventType = '';
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                if (line.startsWith('event: ')) { eventType = line.slice(7).trim(); }
+                else if (line.startsWith('data: ')) {
+                    try {
+                        var data = JSON.parse(line.slice(6));
+                        if (eventType === 'chunk' && data.content) {
+                            accumulated += data.content;
+                            var chunkLines = data.content.split('\n');
+                            for (var j = 0; j < chunkLines.length; j++) {
+                                var cl = chunkLines[j];
+                                if (/^#{1,2}\s+\S/.test(cl.trim())) { startDetailSection(cl.trim()); }
+                                else if (currentSection) { currentSection.markdown += cl + '\n'; }
+                            }
+                            renderDetailSection();
+                        } else if (eventType === 'done') {
+                            finalizeDetailSection();
+                            if (progressEl) progressEl.remove();
+                        } else if (eventType === 'error') {
+                            if (progressEl) progressEl.remove();
+                            detailsContent.innerHTML += '<div class="stream-error">' + (data.message || 'Details generation was interrupted.') + '</div>';
+                        }
+                    } catch (e) {}
+                }
+            }
+        }
+    });
 })();
 </script>
 {% endblock %}

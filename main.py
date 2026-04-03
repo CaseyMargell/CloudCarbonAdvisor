@@ -11,7 +11,7 @@ from fastapi.templating import Jinja2Templates
 import config
 from rate_limiter import RateLimiter
 from services.file_processor import validate_file, extract_text
-from services.llm_service import analyze_bill
+from services.llm_service import analyze_bill, analyze_bill_details
 
 logger = logging.getLogger("cloud-carbon-advisor")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -74,6 +74,7 @@ def _base_context() -> dict:
         "contact_email": config.CONTACT_EMAIL,
         "bmac_url": config.BMAC_URL,
         "github_url": config.GITHUB_URL,
+        "tree_donation_url": config.TREE_DONATION_URL,
     }
 
 
@@ -138,9 +139,11 @@ async def analyze(request: Request, file: UploadFile = File(...)):
     if not bill_text or len(bill_text.strip()) < 10:
         return JSONResponse(status_code=400, content={"error": "Could not extract meaningful text from this file. For PDFs, try a text-based export rather than a scanned image."})
 
-    # Stream analysis — send delta chunks, client accumulates
+    # Stream analysis — send bill context first so client can request details later
     async def event_stream():
         try:
+            yield format_sse("context", {"bill_text": bill_text})
+
             async for chunk in analyze_bill(bill_text, reference_data, request):
                 yield format_sse("chunk", {"content": chunk})
 
@@ -157,6 +160,41 @@ async def analyze(request: Request, file: UploadFile = File(...)):
             "X-Accel-Buffering": "no",
             "Connection": "keep-alive",
         },
+    )
+
+
+@app.post("/api/analyze/details")
+async def analyze_details(request: Request):
+    """Generate detailed recommendation breakdowns from previously extracted bill text."""
+    try:
+        body = await request.json()
+        bill_text = body.get("bill_text", "")
+    except Exception:
+        return JSONResponse(status_code=400, content={"error": "Invalid request body."})
+
+    if not bill_text or len(bill_text.strip()) < 10:
+        return JSONResponse(status_code=400, content={"error": "No bill text provided."})
+
+    # Rate limit the details call too
+    client_ip = get_client_ip(request)
+    allowed, retry_after = await rate_limiter.check(client_ip)
+    if not allowed:
+        minutes = retry_after // 60 + 1
+        return JSONResponse(status_code=429, content={"error": f"Rate limit reached. Try again in {minutes} minute(s)."})
+
+    async def event_stream():
+        try:
+            async for chunk in analyze_bill_details(bill_text, reference_data, request):
+                yield format_sse("chunk", {"content": chunk})
+            yield format_sse("done", {})
+        except Exception as e:
+            logger.error("Details stream error: %s", e)
+            yield format_sse("error", {"message": "Could not generate details. Please try again."})
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no", "Connection": "keep-alive"},
     )
 
 
