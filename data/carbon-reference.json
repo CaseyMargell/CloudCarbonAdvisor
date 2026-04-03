@@ -1,122 +1,150 @@
 {
-  "last_updated": "2026-04-03T00:00:00Z",
+  "last_updated": "2026-04-02T00:00:00Z",
   "data_sources": {
-    "carbon_intensity": "Electricity Maps (https://app.electricitymaps.com), US EPA eGRID, European Environment Agency",
+    "carbon_intensity": "Cloud Carbon Footprint project (EPA eGRID2023, EEA, IEA), cross-referenced with CarbonFootprint.com 2024 factors and Electricity Maps methodology",
     "instance_energy": "SPECpower database, Intel/AMD/Ampere published TDP values, cloud provider documentation",
-    "pue": "Cloud provider sustainability reports (AWS 2023, Microsoft 2023, Google 2024)"
+    "pue": "AWS 2024 Sustainability Report (global PUE 1.15), Microsoft 2023 sustainability data, Google 2024 environmental report",
+    "epa_egrid": "eGRID2023 (released January 2025, revised June 2025) for US subregion emission factors",
+    "ccf_project": "Cloud Carbon Footprint v0.x (https://www.cloudcarbonfootprint.org) for international region factors",
+    "carbonfootprint_com": "CarbonFootprint.com international electricity factors 2024 for UK, Germany, France"
   },
-  "methodology_notes": "Carbon intensity values represent annual average grid carbon intensity for each region's geographic location. Actual intensity varies by time of day and season. PUE (Power Usage Effectiveness) is applied as a multiplier to account for datacenter cooling and overhead. Instance TDP values represent typical power draw under moderate load (~50% utilization); actual power varies with workload.",
+  "methodology_notes": "Carbon intensity values represent annual average grid carbon intensity for each region's geographic location, NOT accounting for cloud provider renewable energy purchases (which use market-based accounting via RECs/PPAs). Actual intensity varies by time of day and season. For US regions, sub-grid factors (e.g., CAMX for California, BPA for Oregon) are used instead of broader NERC region averages (e.g., WECC) for greater accuracy. PUE (Power Usage Effectiveness) is applied as a multiplier to account for datacenter cooling and overhead. AWS reports global PUE of 1.15 (2024), with regional variation: Europe 1.11, North America 1.14, Asia Pacific 1.27.",
+  "verification_notes": {
+    "us_regions": "US values use EPA eGRID2023 subregion factors. us-west-1 uses CAMX (California ISO), us-west-2 uses BPA (Bonneville Power) rather than WECC-wide average, which is more accurate for these specific locations.",
+    "canada": "ca-central-1 uses Quebec provincial grid factor (hydro-dominated ~22 gCO2/kWh), not Canada national average (~115 gCO2/kWh), since the datacenter is in Montreal.",
+    "international": "International values sourced from Cloud Carbon Footprint project (IEA-based) cross-referenced with CarbonFootprint.com 2024 factors where available.",
+    "renewable_percentages": "Approximate annual averages from national/regional grid operator data. Do not reflect time-of-day variation.",
+    "aws_renewable_claims": "AWS claims 100% renewable energy matching (2024) via market-based accounting. This does NOT change grid carbon intensity values, which represent the physical grid mix."
+  },
   "providers": {
     "aws": {
-      "pue": 1.135,
+      "pue": 1.15,
       "regions": {
         "us-east-1": {
           "name": "N. Virginia",
-          "grid_carbon_intensity_gco2_kwh": 383,
-          "renewable_percentage": 35,
-          "notes": "PJM Interconnection (Dominion Virginia), coal/gas/nuclear mix. One of the highest-carbon AWS regions."
+          "grid_carbon_intensity_gco2_kwh": 379.1,
+          "renewable_percentage": 33,
+          "source": "EPA eGRID2023 SRVC subregion, confirmed by CCF (0.000379069 mtCO2/kWh)",
+          "notes": "PJM Interconnection (Dominion Virginia), coal/gas/nuclear mix. One of the highest-carbon US AWS regions."
         },
         "us-east-2": {
           "name": "Ohio",
-          "grid_carbon_intensity_gco2_kwh": 410,
-          "renewable_percentage": 20,
-          "notes": "PJM Interconnection (AEP Ohio), significant coal generation."
+          "grid_carbon_intensity_gco2_kwh": 410.6,
+          "renewable_percentage": 19,
+          "source": "EPA eGRID2023 RFCW subregion, confirmed by CCF (0.000410608 mtCO2/kWh)",
+          "notes": "PJM Interconnection (AEP Ohio), significant coal and gas generation."
         },
         "us-west-1": {
           "name": "N. California",
-          "grid_carbon_intensity_gco2_kwh": 210,
-          "renewable_percentage": 55,
-          "notes": "CAISO grid, growing solar and wind portfolio."
+          "grid_carbon_intensity_gco2_kwh": 210.4,
+          "renewable_percentage": 56,
+          "source": "EPA eGRID2023 CAMX subregion (428.5 lbs/MWh = 194 gCO2/kWh direct combustion; ~210 lifecycle). Sub-grid of WECC.",
+          "notes": "CAISO grid, growing solar and wind portfolio. More accurate than WECC-wide average of 322."
         },
         "us-west-2": {
           "name": "Oregon",
-          "grid_carbon_intensity_gco2_kwh": 78,
+          "grid_carbon_intensity_gco2_kwh": 78.4,
           "renewable_percentage": 85,
-          "notes": "Predominantly hydroelectric (BPA). One of the lowest-carbon AWS regions."
+          "source": "EPA eGRID2023 BPA/NWPP subregion. Bonneville Power Administration hydro-dominated. Sub-grid of WECC.",
+          "notes": "Predominantly Columbia River hydroelectric. One of the lowest-carbon AWS regions globally. WECC-wide average (322) is misleading."
         },
         "ca-central-1": {
           "name": "Canada (Montreal)",
-          "grid_carbon_intensity_gco2_kwh": 22,
+          "grid_carbon_intensity_gco2_kwh": 22.0,
           "renewable_percentage": 95,
-          "notes": "Quebec hydro-dominated grid. Extremely low carbon intensity."
+          "source": "Hydro-Quebec grid data. CCF uses Canada-wide 115.4 gCO2/kWh which is inaccurate for Quebec specifically.",
+          "notes": "Quebec hydro-dominated grid. Extremely low carbon intensity. National average (~115) is misleading due to Alberta/Saskatchewan coal/gas."
         },
         "eu-west-1": {
           "name": "Ireland",
-          "grid_carbon_intensity_gco2_kwh": 296,
-          "renewable_percentage": 42,
-          "notes": "EirGrid, increasing wind capacity but still significant gas generation."
+          "grid_carbon_intensity_gco2_kwh": 305.0,
+          "renewable_percentage": 40,
+          "source": "CCF (0.000305 mtCO2/kWh), IEA Ireland data. EirGrid reports 300-320 range for recent years.",
+          "notes": "EirGrid, increasing wind capacity (target 80% by 2030) but still significant natural gas generation."
         },
         "eu-west-2": {
           "name": "London",
-          "grid_carbon_intensity_gco2_kwh": 225,
-          "renewable_percentage": 50,
-          "notes": "UK National Grid, growing offshore wind and nuclear."
+          "grid_carbon_intensity_gco2_kwh": 207.0,
+          "renewable_percentage": 52,
+          "source": "CarbonFootprint.com 2024 UK factor (0.207 kgCO2/kWh). CCF uses 305 which appears outdated due to rapid UK grid decarbonization.",
+          "notes": "UK National Grid has decarbonized rapidly. Growing offshore wind and nuclear. Down from ~400 in 2015."
         },
         "eu-west-3": {
           "name": "Paris",
-          "grid_carbon_intensity_gco2_kwh": 56,
-          "renewable_percentage": 25,
-          "notes": "French grid dominated by nuclear power. Very low carbon."
+          "grid_carbon_intensity_gco2_kwh": 52.0,
+          "renewable_percentage": 27,
+          "source": "CarbonFootprint.com 2024 France factor (0.052 kgCO2/kWh). CCF uses 74 gCO2/kWh.",
+          "notes": "French grid dominated by nuclear power (~70%). Very low carbon. Among the cleanest major grids in Europe."
         },
         "eu-central-1": {
           "name": "Frankfurt",
-          "grid_carbon_intensity_gco2_kwh": 338,
-          "renewable_percentage": 45,
-          "notes": "German grid, transitioning but still significant coal/lignite."
+          "grid_carbon_intensity_gco2_kwh": 368.0,
+          "renewable_percentage": 46,
+          "source": "CCF (0.000368 mtCO2/kWh). CarbonFootprint.com reports 380 gCO2/kWh for Germany. Using CCF value.",
+          "notes": "German grid, Energiewende transition ongoing but still significant coal/lignite generation post-nuclear phase-out."
         },
         "eu-north-1": {
           "name": "Stockholm",
-          "grid_carbon_intensity_gco2_kwh": 28,
-          "renewable_percentage": 90,
-          "notes": "Swedish grid, hydro and nuclear dominated. Among the cleanest in Europe."
+          "grid_carbon_intensity_gco2_kwh": 8.8,
+          "renewable_percentage": 92,
+          "source": "CCF (0.0000088 mtCO2/kWh = 8.8 gCO2/kWh). Swedish grid is hydro + nuclear dominated.",
+          "notes": "Swedish grid, hydro and nuclear dominated. Among the cleanest grids globally. Lowest carbon AWS region in Europe."
         },
         "ap-southeast-1": {
           "name": "Singapore",
-          "grid_carbon_intensity_gco2_kwh": 408,
-          "renewable_percentage": 5,
-          "notes": "Almost entirely natural gas generation. Limited renewable potential."
+          "grid_carbon_intensity_gco2_kwh": 494.5,
+          "renewable_percentage": 4,
+          "source": "CCF (0.00049453 mtCO2/kWh). Singapore EMA data suggests 410-430 for direct combustion; lifecycle ~495.",
+          "notes": "Almost entirely natural gas generation (~95%). Limited renewable potential due to small land area. Using lifecycle value for consistency."
         },
         "ap-southeast-2": {
           "name": "Sydney",
-          "grid_carbon_intensity_gco2_kwh": 530,
-          "renewable_percentage": 30,
-          "notes": "NSW grid, significant coal generation. One of the higher-carbon regions."
+          "grid_carbon_intensity_gco2_kwh": 580.2,
+          "renewable_percentage": 28,
+          "source": "CCF (0.00058023 mtCO2/kWh). NSW grid still coal-heavy despite growing renewables.",
+          "notes": "NSW grid, significant black coal generation. One of the higher-carbon AWS regions. Transitioning with large-scale solar/wind."
         },
         "ap-northeast-1": {
           "name": "Tokyo",
-          "grid_carbon_intensity_gco2_kwh": 462,
-          "renewable_percentage": 22,
-          "notes": "TEPCO grid, gas and coal with some nuclear restart."
+          "grid_carbon_intensity_gco2_kwh": 439.8,
+          "renewable_percentage": 23,
+          "source": "CCF (0.00043984 mtCO2/kWh). TEPCO grid, post-Fukushima nuclear restarts gradually lowering intensity.",
+          "notes": "TEPCO grid, LNG gas and coal dominant with gradual nuclear restart. Declining from ~500+ post-Fukushima levels."
         },
         "ap-northeast-2": {
           "name": "Seoul",
-          "grid_carbon_intensity_gco2_kwh": 415,
-          "renewable_percentage": 10,
-          "notes": "Korean grid, coal and nuclear mix."
+          "grid_carbon_intensity_gco2_kwh": 477.4,
+          "renewable_percentage": 9,
+          "source": "CCF (0.00047739 mtCO2/kWh). Korean grid is coal+nuclear+LNG.",
+          "notes": "Korean grid, coal and nuclear mix with growing LNG. Low renewable penetration."
         },
         "ap-south-1": {
           "name": "Mumbai",
-          "grid_carbon_intensity_gco2_kwh": 632,
-          "renewable_percentage": 25,
-          "notes": "Indian Western grid, coal-heavy. Highest carbon AWS region."
+          "grid_carbon_intensity_gco2_kwh": 708.2,
+          "renewable_percentage": 24,
+          "source": "CCF uses 951.8 gCO2/kWh which appears high; IEA India average ~700-710 gCO2/kWh (2023). Using IEA-aligned value.",
+          "notes": "Indian grid, coal-heavy (~70% of generation). Growing solar capacity but still among highest-carbon regions globally."
         },
         "sa-east-1": {
           "name": "São Paulo",
-          "grid_carbon_intensity_gco2_kwh": 62,
-          "renewable_percentage": 85,
-          "notes": "Brazilian grid, predominantly hydroelectric."
+          "grid_carbon_intensity_gco2_kwh": 63.98,
+          "renewable_percentage": 84,
+          "source": "CCF (0.00006398 mtCO2/kWh). Brazilian grid is predominantly hydroelectric.",
+          "notes": "Brazilian grid, ~65% hydro + wind + biomass. Very low carbon. One of the cleanest AWS regions."
         },
         "me-south-1": {
           "name": "Bahrain",
-          "grid_carbon_intensity_gco2_kwh": 506,
-          "renewable_percentage": 5,
-          "notes": "Almost entirely natural gas generation."
+          "grid_carbon_intensity_gco2_kwh": 505.5,
+          "renewable_percentage": 3,
+          "source": "CCF (0.00050549 mtCO2/kWh). Gulf states are almost entirely fossil fuel powered.",
+          "notes": "Almost entirely natural gas generation. Minimal renewable deployment."
         },
         "af-south-1": {
           "name": "Cape Town",
-          "grid_carbon_intensity_gco2_kwh": 680,
-          "renewable_percentage": 15,
-          "notes": "South African grid, heavily coal-dependent. Highest carbon intensity."
+          "grid_carbon_intensity_gco2_kwh": 757.4,
+          "renewable_percentage": 14,
+          "source": "CCF (0.00075744 mtCO2/kWh). Eskom grid is heavily coal-dependent.",
+          "notes": "South African Eskom grid, heavily coal-dependent (~80%+). Highest carbon intensity among AWS regions."
         }
       }
     },
@@ -125,93 +153,97 @@
       "regions": {
         "eastus": {
           "name": "East US (Virginia)",
-          "grid_carbon_intensity_gco2_kwh": 383,
-          "renewable_percentage": 35,
-          "notes": "Same Virginia grid as AWS us-east-1."
+          "grid_carbon_intensity_gco2_kwh": 379.1,
+          "renewable_percentage": 33,
+          "notes": "Same Virginia/SRVC grid as AWS us-east-1."
         },
         "eastus2": {
           "name": "East US 2 (Virginia)",
-          "grid_carbon_intensity_gco2_kwh": 383,
-          "renewable_percentage": 35,
-          "notes": "Same Virginia grid region."
+          "grid_carbon_intensity_gco2_kwh": 379.1,
+          "renewable_percentage": 33,
+          "notes": "Same Virginia/SRVC grid region."
         },
         "centralus": {
           "name": "Central US (Iowa)",
-          "grid_carbon_intensity_gco2_kwh": 350,
+          "grid_carbon_intensity_gco2_kwh": 350.0,
           "renewable_percentage": 55,
+          "source": "ESTIMATED from MISO grid data. Iowa has significant wind capacity.",
           "notes": "MISO grid, significant wind capacity in Iowa."
         },
         "westus2": {
           "name": "West US 2 (Washington)",
-          "grid_carbon_intensity_gco2_kwh": 78,
+          "grid_carbon_intensity_gco2_kwh": 78.4,
           "renewable_percentage": 85,
-          "notes": "Pacific Northwest hydro grid. Very low carbon."
+          "notes": "Pacific Northwest hydro grid (BPA). Very low carbon."
         },
         "westus3": {
           "name": "West US 3 (Arizona)",
-          "grid_carbon_intensity_gco2_kwh": 370,
+          "grid_carbon_intensity_gco2_kwh": 370.0,
           "renewable_percentage": 30,
+          "source": "ESTIMATED from AZNM eGRID subregion.",
           "notes": "Arizona grid, gas/nuclear/solar mix."
         },
         "northeurope": {
           "name": "North Europe (Ireland)",
-          "grid_carbon_intensity_gco2_kwh": 296,
-          "renewable_percentage": 42,
+          "grid_carbon_intensity_gco2_kwh": 305.0,
+          "renewable_percentage": 40,
           "notes": "Same Irish grid as AWS eu-west-1."
         },
         "westeurope": {
           "name": "West Europe (Netherlands)",
-          "grid_carbon_intensity_gco2_kwh": 328,
+          "grid_carbon_intensity_gco2_kwh": 328.0,
           "renewable_percentage": 40,
+          "source": "ESTIMATED from Dutch grid operator TenneT data.",
           "notes": "Dutch grid, gas-heavy with growing offshore wind."
         },
         "uksouth": {
           "name": "UK South (London)",
-          "grid_carbon_intensity_gco2_kwh": 225,
-          "renewable_percentage": 50,
-          "notes": "UK National Grid."
+          "grid_carbon_intensity_gco2_kwh": 207.0,
+          "renewable_percentage": 52,
+          "notes": "UK National Grid. CarbonFootprint.com 2024 factor."
         },
         "germanywestcentral": {
           "name": "Germany West Central (Frankfurt)",
-          "grid_carbon_intensity_gco2_kwh": 338,
-          "renewable_percentage": 45,
-          "notes": "German grid."
+          "grid_carbon_intensity_gco2_kwh": 368.0,
+          "renewable_percentage": 46,
+          "notes": "German grid. CCF value."
         },
         "francecentral": {
           "name": "France Central (Paris)",
-          "grid_carbon_intensity_gco2_kwh": 56,
-          "renewable_percentage": 25,
-          "notes": "French nuclear-dominated grid. Very low carbon."
+          "grid_carbon_intensity_gco2_kwh": 52.0,
+          "renewable_percentage": 27,
+          "notes": "French nuclear-dominated grid. CarbonFootprint.com 2024 factor."
         },
         "swedencentral": {
-          "name": "Sweden Central (Gävle)",
-          "grid_carbon_intensity_gco2_kwh": 28,
-          "renewable_percentage": 90,
-          "notes": "Swedish hydro/nuclear grid. Among the cleanest."
+          "name": "Sweden Central (Gavle)",
+          "grid_carbon_intensity_gco2_kwh": 8.8,
+          "renewable_percentage": 92,
+          "notes": "Swedish hydro/nuclear grid. CCF value. Among the cleanest globally."
         },
         "canadacentral": {
           "name": "Canada Central (Toronto)",
-          "grid_carbon_intensity_gco2_kwh": 30,
+          "grid_carbon_intensity_gco2_kwh": 30.0,
           "renewable_percentage": 90,
-          "notes": "Ontario grid, nuclear and hydro dominated."
+          "source": "Ontario grid data. Nuclear (~60%) and hydro (~25%) dominated.",
+          "notes": "Ontario grid, nuclear and hydro dominated. Low carbon."
         },
         "southeastasia": {
           "name": "Southeast Asia (Singapore)",
-          "grid_carbon_intensity_gco2_kwh": 408,
-          "renewable_percentage": 5,
-          "notes": "Singapore gas grid."
+          "grid_carbon_intensity_gco2_kwh": 494.5,
+          "renewable_percentage": 4,
+          "notes": "Singapore gas grid. CCF lifecycle value."
         },
         "australiaeast": {
           "name": "Australia East (NSW)",
-          "grid_carbon_intensity_gco2_kwh": 530,
-          "renewable_percentage": 30,
-          "notes": "NSW coal-heavy grid."
+          "grid_carbon_intensity_gco2_kwh": 580.2,
+          "renewable_percentage": 28,
+          "notes": "NSW coal-heavy grid. CCF value."
         },
         "japaneast": {
           "name": "Japan East (Tokyo)",
-          "grid_carbon_intensity_gco2_kwh": 462,
-          "renewable_percentage": 22,
-          "notes": "TEPCO grid."
+          "grid_carbon_intensity_gco2_kwh": 439.8,
+          "renewable_percentage": 23,
+          "notes": "TEPCO grid. CCF value."
         }
       }
     },
@@ -220,87 +252,94 @@
       "regions": {
         "us-central1": {
           "name": "Iowa",
-          "grid_carbon_intensity_gco2_kwh": 350,
+          "grid_carbon_intensity_gco2_kwh": 350.0,
           "renewable_percentage": 55,
-          "notes": "MISO Iowa, significant wind. Google matches 100% with renewables here."
+          "source": "ESTIMATED from MISO grid data.",
+          "notes": "MISO Iowa, significant wind. Google reports 97%+ CFE matching here."
         },
         "us-east1": {
           "name": "South Carolina",
-          "grid_carbon_intensity_gco2_kwh": 310,
+          "grid_carbon_intensity_gco2_kwh": 310.0,
           "renewable_percentage": 15,
+          "source": "ESTIMATED from Duke Energy Carolinas generation mix.",
           "notes": "Duke Energy Carolinas, nuclear/gas/coal mix."
         },
         "us-east4": {
           "name": "Northern Virginia",
-          "grid_carbon_intensity_gco2_kwh": 383,
-          "renewable_percentage": 35,
-          "notes": "Same Virginia grid as AWS/Azure."
+          "grid_carbon_intensity_gco2_kwh": 379.1,
+          "renewable_percentage": 33,
+          "notes": "Same Virginia/SRVC grid as AWS/Azure."
         },
         "us-west1": {
           "name": "Oregon",
-          "grid_carbon_intensity_gco2_kwh": 78,
+          "grid_carbon_intensity_gco2_kwh": 78.4,
           "renewable_percentage": 85,
-          "notes": "Pacific NW hydro. Google matches 100% with renewables here."
+          "notes": "Pacific NW hydro (BPA). Google reports 90%+ CFE matching here."
         },
         "us-west4": {
           "name": "Las Vegas",
-          "grid_carbon_intensity_gco2_kwh": 390,
+          "grid_carbon_intensity_gco2_kwh": 390.0,
           "renewable_percentage": 25,
+          "source": "ESTIMATED from Nevada Power/NWPP grid data.",
           "notes": "Nevada grid, gas/solar mix."
         },
         "northamerica-northeast1": {
-          "name": "Montréal",
-          "grid_carbon_intensity_gco2_kwh": 22,
+          "name": "Montreal",
+          "grid_carbon_intensity_gco2_kwh": 22.0,
           "renewable_percentage": 95,
           "notes": "Quebec hydro grid. Among the cleanest globally."
         },
         "europe-west1": {
           "name": "Belgium",
-          "grid_carbon_intensity_gco2_kwh": 148,
+          "grid_carbon_intensity_gco2_kwh": 148.0,
           "renewable_percentage": 35,
+          "source": "ESTIMATED from Belgian grid operator Elia data.",
           "notes": "Belgian grid, nuclear/gas/wind mix."
         },
         "europe-west2": {
           "name": "London",
-          "grid_carbon_intensity_gco2_kwh": 225,
-          "renewable_percentage": 50,
-          "notes": "UK National Grid."
+          "grid_carbon_intensity_gco2_kwh": 207.0,
+          "renewable_percentage": 52,
+          "notes": "UK National Grid. CarbonFootprint.com 2024 factor."
         },
         "europe-west3": {
           "name": "Frankfurt",
-          "grid_carbon_intensity_gco2_kwh": 338,
-          "renewable_percentage": 45,
-          "notes": "German grid."
+          "grid_carbon_intensity_gco2_kwh": 368.0,
+          "renewable_percentage": 46,
+          "notes": "German grid. CCF value."
         },
         "europe-west4": {
           "name": "Netherlands",
-          "grid_carbon_intensity_gco2_kwh": 328,
+          "grid_carbon_intensity_gco2_kwh": 328.0,
           "renewable_percentage": 40,
-          "notes": "Dutch grid."
+          "source": "ESTIMATED from TenneT grid data.",
+          "notes": "Dutch grid, gas-heavy with growing offshore wind."
         },
         "europe-north1": {
           "name": "Finland",
-          "grid_carbon_intensity_gco2_kwh": 85,
+          "grid_carbon_intensity_gco2_kwh": 85.0,
           "renewable_percentage": 65,
-          "notes": "Finnish grid, nuclear/hydro/wind. Google reports low carbon."
+          "source": "ESTIMATED from Fingrid data. Nuclear + hydro + wind dominated.",
+          "notes": "Finnish grid, nuclear/hydro/wind. Google reports low carbon CFE matching."
         },
         "asia-east1": {
           "name": "Taiwan",
-          "grid_carbon_intensity_gco2_kwh": 502,
+          "grid_carbon_intensity_gco2_kwh": 502.0,
           "renewable_percentage": 10,
+          "source": "ESTIMATED from Taipower generation statistics.",
           "notes": "Taipower grid, coal/gas dominated."
         },
         "asia-southeast1": {
           "name": "Singapore",
-          "grid_carbon_intensity_gco2_kwh": 408,
-          "renewable_percentage": 5,
-          "notes": "Singapore gas grid."
+          "grid_carbon_intensity_gco2_kwh": 494.5,
+          "renewable_percentage": 4,
+          "notes": "Singapore gas grid. CCF lifecycle value."
         },
         "australia-southeast1": {
           "name": "Sydney",
-          "grid_carbon_intensity_gco2_kwh": 530,
-          "renewable_percentage": 30,
-          "notes": "NSW grid."
+          "grid_carbon_intensity_gco2_kwh": 580.2,
+          "renewable_percentage": 28,
+          "notes": "NSW grid. CCF value."
         }
       }
     }
