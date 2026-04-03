@@ -331,6 +331,50 @@ a:hover { color: var(--teal-700); }
     font-size: 0.9375rem;
 }
 
+/* --- Section Progress Indicator --- */
+.section-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.75rem 1rem;
+    margin: 0.75rem 0;
+    background: var(--teal-50);
+    border: 1px solid var(--teal-200, #99f6e4);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--teal-700);
+    animation: fadeIn 0.3s ease;
+}
+
+.section-spinner {
+    width: 20px;
+    height: 20px;
+    color: var(--teal-600);
+    flex-shrink: 0;
+    animation: spin 2s linear infinite;
+}
+
+.result-section {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.stream-error {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.5rem;
+    color: #b91c1c;
+}
+
+.stream-error a { color: #b91c1c; text-decoration: underline; }
+
 /* --- Results Section --- */
 .results-actions {
     margin-top: 2rem;
