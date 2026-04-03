@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ description | default('Upload your cloud bill and get actionable carbon reduction recommendations. Free, private, no account needed.') }}">
+    <title>{% block title %}Cloud Carbon Advisor{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <style media="print">
+        .no-print, .site-footer { display: none !important; }
+        body { background: white; }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="site-container">
+            <a href="/" class="site-logo">
+                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Cloud Carbon Advisor</span>
+            </a>
+            <a href="{{ header_link_url | default('/sample') }}" class="header-link no-print">{{ header_link_text | default('See sample report') }}</a>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="site-container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="site-footer no-print">
+        <div class="site-container">
+            <p class="footer-text">Free and open source. If it helped reduce your carbon footprint:</p>
+            <div class="footer-links">
+                {% if bmac_url %}
+                <a href="{{ bmac_url }}" target="_blank" rel="noopener">Buy me a coffee</a>
+                {% endif %}
+                {% if contact_url %}
+                <a href="{{ contact_url }}" target="_blank" rel="noopener">Need hands-on help?</a>
+                {% endif %}
+                {% if github_url %}
+                <a href="{{ github_url }}" target="_blank" rel="noopener">GitHub</a>
+                {% endif %}
+                <a href="/faq">FAQ</a>
+                <a href="mailto:{{ contact_email }}">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

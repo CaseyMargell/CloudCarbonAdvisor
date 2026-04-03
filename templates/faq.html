@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ — Cloud Carbon Advisor{% endblock %}
+
+{% block content %}
+<h1 class="hero-headline" style="font-size: 1.75rem; margin-bottom: 1.5rem;">Frequently Asked Questions</h1>
+
+<div id="results-content">
+
+<h2>Why did we build this?</h2>
+<p>Cloud infrastructure is responsible for a growing share of global carbon emissions, but most teams have no easy way to measure or reduce their impact. Existing tools require account integrations, enterprise contracts, or ongoing monitoring setups. We wanted something simpler: <strong>upload a bill, get actionable recommendations, done.</strong></p>
+
+<h2>Where does the carbon data come from?</h2>
+<p>Our carbon intensity data comes from multiple verified sources:</p>
+<ul>
+    <li><strong>US regions</strong>: EPA eGRID2023 (released January 2025, revised June 2025) — subregion-level emission factors</li>
+    <li><strong>International regions</strong>: Cloud Carbon Footprint project (IEA-based), cross-referenced with CarbonFootprint.com 2024 factors</li>
+    <li><strong>Instance energy profiles</strong>: SPECpower database, Intel/AMD/Ampere published TDP values, and cloud provider documentation</li>
+    <li><strong>PUE (datacenter overhead)</strong>: AWS 2024 Sustainability Report, Microsoft 2023 sustainability data, Google 2024 environmental report</li>
+</ul>
+<p>We use location-based (physical grid) carbon intensity, not market-based accounting with renewable energy certificates. This gives you the actual carbon impact of running workloads in each region.</p>
+
+<h2>How often is the data updated?</h2>
+<p>The carbon reference dataset was last updated on <strong>{{ reference_data_updated }}</strong>. We aim to update the data weekly as grid carbon intensity changes with seasonal generation mix. The automated update pipeline sources fresh data from EPA eGRID and the Cloud Carbon Footprint project.</p>
+
+<h2>How accurate are the estimates?</h2>
+<p>All carbon estimates are approximate (±20%). Key limitations:</p>
+<ul>
+    <li>We estimate energy from instance type TDP specs and usage hours — actual power draw depends on workload intensity</li>
+    <li>Grid carbon intensity is an annual average — actual intensity varies by time of day and season</li>
+    <li>Billing data alone cannot determine CPU/memory utilization — right-sizing recommendations should be validated with monitoring</li>
+</ul>
+<p>That said, the relative comparisons between regions and instance types are reliable. If we say Oregon is 80% cleaner than Virginia, that directional guidance holds even if the absolute numbers are approximate.</p>
+
+<h2>What happens to my data?</h2>
+<p>Your bill is processed in memory and immediately discarded. We don't store files, we don't use a database, and we don't set cookies. The bill text is sent to Claude AI (Anthropic) for analysis — Anthropic does not use API data for model training. See <a href="https://www.anthropic.com/policies/privacy" target="_blank" rel="noopener">Anthropic's privacy policy</a> for details.</p>
+
+<h2>Which cloud providers are supported?</h2>
+<p>AWS, Azure, and GCP. We accept PDF and CSV bill exports. The AI can interpret most billing formats from these providers, including AWS Cost and Usage Reports, Azure cost exports, and GCP billing exports.</p>
+
+<h2>Is this open source?</h2>
+<p>Yes. The full source code is available on <a href="{{ github_url }}" target="_blank" rel="noopener">GitHub</a>. Contributions are welcome.</p>
+
+<h2>Who built this?</h2>
+<p>Cloud Carbon Advisor was built by Casey Margell. If you have questions, feedback, or need hands-on help optimizing your cloud infrastructure, <a href="mailto:{{ contact_email }}">get in touch</a>.</p>
+
+</div>
+{% endblock %}

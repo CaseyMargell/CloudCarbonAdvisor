@@ -1,293 +1,200 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Upload your cloud bill and get actionable carbon reduction recommendations in 60 seconds. Free, private, no account needed.">
-    <title>Cloud Carbon Advisor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
-    <link rel="stylesheet" href="/static/style.css?v=10">
-</head>
-<body>
-    <!-- Header -->
-    <header class="site-header">
-        <div class="site-container">
-            <div class="site-logo">
-                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>Cloud Carbon Advisor</span>
-            </div>
-            <a href="/sample" class="header-link no-print">See sample report</a>
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Upload Section -->
+<div id="upload-section">
+    <h1 class="hero-headline">
+        Upload your cloud bill.<br><span class="hero-accent">Get carbon savings in 60 seconds.</span>
+    </h1>
+    <p class="hero-sub">
+        Actionable recommendations to cut your cloud infrastructure's carbon footprint.
+    </p>
+
+    <form id="upload-form" class="upload-form">
+        <div id="drop-zone" role="button" tabindex="0" aria-label="Upload a cloud bill file">
+            <svg class="drop-icon" width="44" height="44" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+            <p class="drop-label">
+                Drag & drop your bill here, or <span class="browse-link">browse files</span>
+            </p>
+            <p class="drop-hint">
+                AWS, Azure, or GCP &mdash; PDF or CSV up to {{ max_file_size_mb }}MB
+            </p>
+            <input type="file" id="file-input" accept=".pdf,.csv,.tsv" class="hidden">
         </div>
-    </header>
+    </form>
 
-    <!-- Main Content -->
-    <main class="site-main">
-        <div class="site-container">
-            <!-- Upload Section -->
-            <div id="upload-section">
-                <h1 class="hero-headline">
-                    Upload your cloud bill.<br><span class="hero-accent">Get carbon savings in 60 seconds.</span>
-                </h1>
-                <p class="hero-sub">
-                    Actionable recommendations to cut your cloud infrastructure's carbon footprint.
-                </p>
-
-                <!-- Upload Form -->
-                <form id="upload-form" class="upload-form">
-                    <div id="drop-zone" role="button" tabindex="0" aria-label="Upload a cloud bill file">
-                        <svg class="drop-icon" width="44" height="44" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                        </svg>
-                        <p class="drop-label">
-                            Drag & drop your bill here, or <span class="browse-link">browse files</span>
-                        </p>
-                        <p class="drop-hint">
-                            AWS, Azure, or GCP &mdash; PDF or CSV up to {{ max_file_size_mb }}MB
-                        </p>
-                        <input type="file" id="file-input" accept=".pdf,.csv,.tsv" class="hidden">
-                    </div>
-                </form>
-
-                <!-- How It Works -->
-                <div class="steps-grid">
-                    <div class="step-card">
-                        <div class="step-number">1</div>
-                        <div>
-                            <div class="step-title">Upload your bill</div>
-                            <p class="step-desc">PDF or CSV from any major cloud provider</p>
-                        </div>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">2</div>
-                        <div>
-                            <div class="step-title">AI analyzes usage</div>
-                            <p class="step-desc">Regions, instances, and services mapped to carbon data</p>
-                        </div>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">3</div>
-                        <div>
-                            <div class="step-title">Get recommendations</div>
-                            <p class="step-desc">Prioritized by carbon impact with cost estimates</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Privacy Note -->
-                <div class="privacy-note">
-                    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                    </svg>
-                    Your bill is analyzed with Claude AI and immediately discarded. No data is stored.
-                </div>
-            </div>
-
-            <!-- Processing Section (hidden by default) -->
-            <div id="processing-section" class="hidden processing-section">
-                <div class="spinner"></div>
-                <h2>Analyzing your bill...</h2>
-                <p>This typically takes 30 to 60 seconds.</p>
-            </div>
-
-            <!-- Results Section (hidden by default) -->
-            <div id="results-section" class="hidden">
-                <div id="results-content" aria-live="polite"></div>
-                <div id="results-actions" class="hidden results-actions no-print">
-                    <button onclick="window.print()" class="btn-primary">
-                        Download as PDF
-                    </button>
-                    <a href="/" class="btn-secondary">
-                        Start over
-                    </a>
-                </div>
-            </div>
-
-            <!-- Error Section (hidden by default) -->
-            <div id="error-section" class="hidden error-section">
-                <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-                </svg>
-                <p id="error-message"></p>
-                <a href="/">Start over</a>
+    <div class="steps-grid">
+        <div class="step-card">
+            <div class="step-number">1</div>
+            <div>
+                <div class="step-title">Upload your bill</div>
+                <p class="step-desc">PDF or CSV from any major cloud provider</p>
             </div>
         </div>
-    </main>
-
-    <!-- Footer -->
-    <footer id="footer" class="site-footer no-print">
-        <div class="site-container">
-            <p class="footer-text">Free and open source. If it helped reduce your carbon footprint:</p>
-            <div class="footer-links">
-                {% if bmac_url %}
-                <a href="{{ bmac_url }}" target="_blank" rel="noopener">Buy me a coffee</a>
-                {% endif %}
-                {% if contact_url %}
-                <a href="{{ contact_url }}" target="_blank" rel="noopener">Need hands-on help?</a>
-                {% endif %}
-                {% if github_url %}
-                <a href="{{ github_url }}" target="_blank" rel="noopener">GitHub</a>
-                {% endif %}
+        <div class="step-card">
+            <div class="step-number">2</div>
+            <div>
+                <div class="step-title">AI analyzes usage</div>
+                <p class="step-desc">Regions, instances, and services mapped to carbon data</p>
             </div>
         </div>
-    </footer>
+        <div class="step-card">
+            <div class="step-number">3</div>
+            <div>
+                <div class="step-title">Get recommendations</div>
+                <p class="step-desc">Prioritized by carbon impact with cost estimates</p>
+            </div>
+        </div>
+    </div>
 
-    <script>
-    (function() {
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
-        const uploadSection = document.getElementById('upload-section');
-        const processingSection = document.getElementById('processing-section');
-        const resultsSection = document.getElementById('results-section');
-        const resultsContent = document.getElementById('results-content');
-        const resultsActions = document.getElementById('results-actions');
-        const errorSection = document.getElementById('error-section');
-        const errorMessage = document.getElementById('error-message');
+    <div class="privacy-note">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+        Your bill is analyzed with Claude AI and immediately discarded. No data is stored.
+    </div>
+</div>
 
-        const MAX_SIZE = {{ max_file_size_mb }} * 1024 * 1024;
+<!-- Processing Section -->
+<div id="processing-section" class="hidden processing-section">
+    <div class="spinner"></div>
+    <h2>Analyzing your bill...</h2>
+    <p>This typically takes 30 to 60 seconds.</p>
+</div>
 
-        // Configure marked — allow HTML for <details>/<summary> from LLM output
-        // DOMPurify sanitizes the output so raw HTML passthrough is safe
-        marked.setOptions({ breaks: true, gfm: true });
+<!-- Results Section -->
+<div id="results-section" class="hidden">
+    <div id="results-content" aria-live="polite"></div>
+    <div id="results-actions" class="hidden results-actions no-print">
+        <button onclick="window.print()" class="btn-primary">Download as PDF</button>
+        <a href="/" class="btn-secondary">Start over</a>
+    </div>
+</div>
 
-        // --- Drag and drop ---
-        dropZone.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        });
-        dropZone.addEventListener('dragleave', function() {
-            dropZone.classList.remove('drag-over');
-        });
-        dropZone.addEventListener('drop', function(e) {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                handleFile(e.dataTransfer.files[0]);
-            }
-        });
-        dropZone.addEventListener('click', function() { fileInput.click(); });
-        dropZone.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
-        });
-        fileInput.addEventListener('change', function() {
-            if (fileInput.files.length) handleFile(fileInput.files[0]);
-        });
+<!-- Error Section -->
+<div id="error-section" class="hidden error-section">
+    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+    </svg>
+    <p id="error-message"></p>
+    <a href="/">Start over</a>
+</div>
+{% endblock %}
 
-        // --- File handling ---
-        function handleFile(file) {
-            if (file.size > MAX_SIZE) {
-                showError('File too large. Maximum size is {{ max_file_size_mb }}MB.');
-                return;
-            }
-            uploadAndStream(file);
+{% block scripts %}
+<script>
+(function() {
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const uploadSection = document.getElementById('upload-section');
+    const processingSection = document.getElementById('processing-section');
+    const resultsSection = document.getElementById('results-section');
+    const resultsContent = document.getElementById('results-content');
+    const resultsActions = document.getElementById('results-actions');
+    const errorSection = document.getElementById('error-section');
+    const errorMessage = document.getElementById('error-message');
+
+    const MAX_SIZE = {{ max_file_size_mb }} * 1024 * 1024;
+
+    marked.setOptions({ breaks: true, gfm: true });
+
+    // --- Drag and drop ---
+    dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('drag-over'); });
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; handleFile(e.dataTransfer.files[0]); }
+    });
+    dropZone.addEventListener('click', function() { fileInput.click(); });
+    dropZone.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+    fileInput.addEventListener('change', function() { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+    function handleFile(file) {
+        if (file.size > MAX_SIZE) { showError('File too large. Maximum size is {{ max_file_size_mb }}MB.'); return; }
+        uploadAndStream(file);
+    }
+
+    function showError(msg) {
+        uploadSection.classList.add('hidden');
+        processingSection.classList.add('hidden');
+        resultsSection.classList.add('hidden');
+        errorSection.classList.remove('hidden');
+        errorMessage.textContent = msg;
+    }
+
+    async function uploadAndStream(file) {
+        uploadSection.classList.add('hidden');
+        processingSection.classList.remove('hidden');
+        resultsSection.classList.add('hidden');
+        errorSection.classList.add('hidden');
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        let response;
+        try { response = await fetch('/api/analyze', { method: 'POST', body: formData }); }
+        catch (err) { showError('Network error. Please check your connection and try again.'); return; }
+
+        if (!response.ok) {
+            try { const data = await response.json(); showError(data.error || 'Something went wrong.'); }
+            catch { showError('Something went wrong. Please try again.'); }
+            return;
         }
 
-        function showError(msg) {
-            uploadSection.classList.add('hidden');
-            processingSection.classList.add('hidden');
-            resultsSection.classList.add('hidden');
-            errorSection.classList.remove('hidden');
-            errorMessage.textContent = msg;
+        processingSection.classList.add('hidden');
+        resultsSection.classList.remove('hidden');
+        resultsContent.innerHTML = '';
+        resultsActions.classList.add('hidden');
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '', accumulated = '', renderPending = false;
+
+        function scheduleRender() {
+            if (!renderPending) {
+                renderPending = true;
+                requestAnimationFrame(function() {
+                    resultsContent.innerHTML = DOMPurify.sanitize(marked.parse(accumulated));
+                    renderPending = false;
+                });
+            }
         }
 
-        // --- Upload + SSE streaming ---
-        async function uploadAndStream(file) {
-            uploadSection.classList.add('hidden');
-            processingSection.classList.remove('hidden');
-            resultsSection.classList.add('hidden');
-            errorSection.classList.add('hidden');
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            let response;
-            try {
-                response = await fetch('/api/analyze', { method: 'POST', body: formData });
-            } catch (err) {
-                showError('Network error. Please check your connection and try again.');
-                return;
-            }
-
-            // Handle non-streaming error responses
-            if (!response.ok) {
-                try {
-                    const data = await response.json();
-                    showError(data.error || 'Something went wrong. Please try again.');
-                } catch {
-                    showError('Something went wrong. Please try again.');
-                }
-                return;
-            }
-
-            // Switch to results view
-            processingSection.classList.add('hidden');
-            resultsSection.classList.remove('hidden');
-            resultsContent.innerHTML = '';
-            resultsActions.classList.add('hidden');
-
-            // Parse SSE stream
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let buffer = '';
-            let accumulated = '';
-            let renderPending = false;
-
-            function scheduleRender() {
-                if (!renderPending) {
-                    renderPending = true;
-                    requestAnimationFrame(function() {
-                        resultsContent.innerHTML = DOMPurify.sanitize(marked.parse(accumulated));
-                        renderPending = false;
-                    });
-                }
-            }
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                buffer = lines.pop(); // Keep incomplete line in buffer
-
-                let eventType = '';
-                for (const line of lines) {
-                    if (line.startsWith('event: ')) {
-                        eventType = line.slice(7).trim();
-                    } else if (line.startsWith('data: ')) {
-                        const dataStr = line.slice(6);
-                        try {
-                            const data = JSON.parse(dataStr);
-                            if (eventType === 'chunk' && data.content) {
-                                accumulated += data.content;
-                                scheduleRender();
-                            } else if (eventType === 'done') {
-                                // Final render to ensure everything is displayed
-                                resultsContent.innerHTML = DOMPurify.sanitize(marked.parse(accumulated));
-                                resultsActions.classList.remove('hidden');
-                            } else if (eventType === 'error') {
-                                if (accumulated) {
-                                    resultsContent.innerHTML += DOMPurify.sanitize(
-                                        '<div class="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">' +
-                                        (data.message || 'Analysis was interrupted.') + ' <a href="/" class="underline">Start over</a></div>');
-                                } else {
-                                    showError(data.message || 'Something went wrong. Please try again.');
-                                }
-                            }
-                        } catch (e) { /* skip malformed JSON */ }
-                    }
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            let eventType = '';
+            for (const line of lines) {
+                if (line.startsWith('event: ')) { eventType = line.slice(7).trim(); }
+                else if (line.startsWith('data: ')) {
+                    try {
+                        const data = JSON.parse(line.slice(6));
+                        if (eventType === 'chunk' && data.content) { accumulated += data.content; scheduleRender(); }
+                        else if (eventType === 'done') {
+                            resultsContent.innerHTML = DOMPurify.sanitize(marked.parse(accumulated));
+                            resultsActions.classList.remove('hidden');
+                        }
+                        else if (eventType === 'error') {
+                            if (accumulated) {
+                                resultsContent.innerHTML += DOMPurify.sanitize(
+                                    '<div style="margin-top:1.5rem;padding:1rem;background:#fef2f2;border:1px solid #fecaca;border-radius:0.5rem;color:#b91c1c">' +
+                                    (data.message || 'Analysis was interrupted.') + ' <a href="/">Start over</a></div>');
+                            } else { showError(data.message || 'Something went wrong.'); }
+                        }
+                    } catch (e) {}
                 }
             }
         }
-    })();
-    </script>
-</body>
-</html>
+    }
+})();
+</script>
+{% endblock %}

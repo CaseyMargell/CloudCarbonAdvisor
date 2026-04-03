@@ -1,0 +1,147 @@
+# AWS Cloud Carbon Footprint Analysis
+
+## Bill Summary
+- **Provider**: AWS
+- **Monthly spend**: ~$2,820 (plus $500 marketplace)
+- **Primary regions**: US East (Ohio) — 88% of spend, US East (N. Virginia), EU (Stockholm)
+- **Top services**: EC2 ($1,565), RDS ($498), Support ($256), CloudWatch ($154)
+
+## Recommendation Summary
+
+| Metric | Value |
+|--------|-------|
+| **Current monthly footprint** | **385 kg CO2e/month** |
+| **After all recommendations** | **~100 kg CO2e/month** |
+| **Total reduction** | **285 kg CO2e/month (−74%)** |
+| **Cost impact** | **$350–400/month savings** |
+
+Equivalent to driving **960 miles** per month, or requiring **15 trees** to offset annually. Full implementation reduces annual emissions by **3.4 tons CO2e**.
+
+### Top 3: Do This First
+1. **Migrate Ohio → Oregon** — saves ~270 kg CO2e/month + $120/month
+2. **Switch to Graviton (t3 → t4g)** — saves ~125 kg CO2e/month + $200/month
+3. **Release idle resources** — saves ~15 kg CO2e/month + $65/year
+
+## Carbon Footprint Estimate
+
+| Component | Carbon (kg CO2e/month) | Notes |
+|-----------|----------------------|-------|
+| EC2 compute | ~315 | t3.large (10,203 hrs) + t3.xlarge (744 hrs) in Ohio |
+| RDS databases | ~65 | Aurora + PostgreSQL Multi-AZ in Ohio |
+| Other services | ~5 | Minimal impact |
+| **Total** | **~385** | |
+
+**Formula**: Carbon = Energy (kWh) × Grid Intensity (gCO2/kWh) × PUE
+Ohio grid: 411 gCO2/kWh • AWS PUE: 1.15
+
+## Detailed Recommendations
+
+<details>
+<summary><strong>Region Migration</strong> — estimated reduction: 270 kg CO2e/month (−70%)</summary>
+
+### Primary: Ohio → Oregon
+- **Current**: us-east-2 (Ohio) at 411 gCO2/kWh
+- **Target**: us-west-2 (Oregon) at 78 gCO2/kWh — **81% cleaner**
+
+**Candidates for migration:**
+- 10× t3.large instances (10,203 hours) — development/staging workloads
+- 1× t3.xlarge (744 hours) — always-on, likely non-latency-sensitive
+- Aurora PostgreSQL cluster (db.t3.medium)
+- PostgreSQL Multi-AZ (db.t3.large)
+
+| Metric | Value |
+|--------|-------|
+| Carbon savings | ~270 kg CO2e/month |
+| Cost impact | **~$120/month savings** (Oregon is 5–8% cheaper) |
+| Effort | **Moderate** (blue/green migration) |
+| Risk | ~40ms additional latency for East Coast users |
+
+### Alternative: Ohio → Canada Central
+- **Target**: ca-central-1 (Montreal) at 22 gCO2/kWh — **95% cleaner**
+- Carbon savings: ~285 kg CO2e/month
+- Cost impact: ~$50/month increase
+- Best if data residency permits
+
+</details>
+
+<details>
+<summary><strong>Instance Optimization (ARM Migration)</strong> — estimated reduction: 125 kg CO2e/month (−32%)</summary>
+
+### x86 → Graviton Migration
+
+| Current | Target | Energy Savings | Cost Savings | CO2e Reduction |
+|---------|--------|---------------|-------------|----------------|
+| 10× t3.large | t4g.large | ~40% | $170/month | 95 kg |
+| 1× t3.xlarge | t4g.xlarge | ~40% | $25/month | 12 kg |
+| 5× t3a/t3.micro | t4g.micro | ~35% | $5/month | 8 kg |
+| db.t3.large Multi-AZ | db.t4g.large | ~35% | $15/month | 8 kg |
+| db.t3.medium Aurora | db.t4g.medium | ~35% | $12/month | 2 kg |
+
+- **Effort**: **Quick win** for new deployments, moderate for migration
+- **Risk**: Verify ARM64 compatibility (most modern applications support this)
+
+</details>
+
+<details>
+<summary><strong>Right-sizing</strong> — estimated reduction: 45 kg CO2e/month (−12%)</summary>
+
+### Over-provisioning Indicators
+- **10× t3.large with identical usage**: Suggests templated deployment — monitor actual utilization
+- **Potential**: Downsize 3–4 instances to t3.medium if utilization < 40%
+- **Savings**: $255/month + 35 kg CO2e
+
+### CPU Credit Usage
+- T3 CPU credits purchased ($14.15) indicates burstable instances exceeding baseline
+- **Action**: Either upsize consistently loaded instances or investigate load patterns
+- **Effort**: **Quick win** (monitoring required first)
+
+*⚠️ Caveat: These recommendations are based on billing patterns, not utilization metrics. Validate with CloudWatch monitoring before downsizing.*
+
+</details>
+
+<details>
+<summary><strong>Idle Resource Cleanup</strong> — estimated reduction: 15 kg CO2e/month (−4%)</summary>
+
+| Resource | Location | Cost | Action |
+|----------|----------|------|--------|
+| Idle public IPv4 addresses | Virginia | $3.72/month | Release unused Elastic IPs |
+| Unused EBS snapshots | Ohio + Virginia | $2/month | Implement lifecycle policies |
+| Classic Load Balancer (0.004 GB processed) | Virginia | $18.60/month | Remove or migrate to ALB |
+
+All items are **quick wins** (< 1 hour each).
+
+</details>
+
+<details>
+<summary><strong>Database I/O Optimization</strong> — estimated reduction: 20 kg CO2e/month (−5%)</summary>
+
+### Aurora I/O Analysis
+- **Current**: 33.6 million I/O requests ($6.73/month)
+- High I/O suggests query optimization or caching opportunities
+
+### Recommendations
+1. Consider Aurora Serverless v2 for variable workloads
+2. Add ElastiCache layer to reduce database I/O
+3. Review slow query logs for optimization opportunities
+- **Effort**: **Moderate** (requires analysis)
+
+</details>
+
+## Implementation Roadmap
+
+### Phase 1: Quick Wins (< 2 hours)
+1. Release idle Elastic IP in Virginia (−$45/year)
+2. Switch 2–3 development t3.large to t4g.large (−$35/month, −25 kg CO2e)
+3. Implement EBS snapshot lifecycle policy (−$2/month)
+
+### Phase 2: High-Impact Migration (1–2 weeks)
+1. Migrate development/staging from Ohio to Oregon (−$100/month, −200 kg CO2e)
+2. Complete ARM migration for remaining instances (−$200/month, −100 kg CO2e)
+
+### Phase 3: Optimization (ongoing)
+1. Monitor and right-size based on utilization data
+2. Implement database I/O optimization
+
+---
+
+*Carbon intensity from EPA eGRID2023 and Cloud Carbon Footprint project. Energy estimates based on Intel/AMD TDP specifications and AWS PUE of 1.15. All estimates approximate ±20%.*

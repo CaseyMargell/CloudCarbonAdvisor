@@ -67,23 +67,36 @@ def format_sse(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {json.dumps(data)}\n\n"
 
 
+def _base_context() -> dict:
+    """Shared template context for all pages."""
+    return {
+        "contact_url": config.CONTACT_URL,
+        "contact_email": config.CONTACT_EMAIL,
+        "bmac_url": config.BMAC_URL,
+        "github_url": config.GITHUB_URL,
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={
-            "contact_url": config.CONTACT_URL,
-            "bmac_url": config.BMAC_URL,
-            "github_url": config.GITHUB_URL,
-            "max_file_size_mb": config.MAX_FILE_SIZE_MB,
-        },
+        context={**_base_context(), "max_file_size_mb": config.MAX_FILE_SIZE_MB},
     )
 
 
 @app.get("/sample", response_class=HTMLResponse)
 async def sample(request: Request):
-    return templates.TemplateResponse(request=request, name="sample.html")
+    ctx = {**_base_context(), "header_link_url": "/", "header_link_text": "Upload your own bill"}
+    return templates.TemplateResponse(request=request, name="sample.html", context=ctx)
+
+
+@app.get("/faq", response_class=HTMLResponse)
+async def faq(request: Request):
+    ctx = {**_base_context(), "header_link_url": "/", "header_link_text": "Upload a bill",
+           "reference_data_updated": reference_data.get("last_updated", "unknown")}
+    return templates.TemplateResponse(request=request, name="faq.html", context=ctx)
 
 
 @app.post("/api/analyze")

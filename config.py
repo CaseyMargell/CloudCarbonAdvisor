@@ -11,6 +11,7 @@ MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
 RATE_LIMIT_PER_HOUR = int(os.getenv("RATE_LIMIT_PER_HOUR", "10"))
 
 CONTACT_URL = os.getenv("CONTACT_URL", "")
+CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", "cmargell@gmail.com")
 BMAC_URL = os.getenv("BMAC_URL", "")
 GITHUB_URL = os.getenv("GITHUB_URL", "")
 
