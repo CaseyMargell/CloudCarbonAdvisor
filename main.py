@@ -109,12 +109,14 @@ async def analyze(request: Request, file: UploadFile = File(...)):
     if len(file_bytes) == 0:
         return JSONResponse(status_code=400, content={"error": "The uploaded file is empty."})
 
-    # Extract text
+    # Extract text, then free file bytes
     try:
         bill_text = await extract_text(file.filename or "unknown", file_bytes)
     except Exception as e:
         logger.error("File extraction failed: %s", e)
         return JSONResponse(status_code=400, content={"error": "Unable to read this file. Try a different format or re-export."})
+    finally:
+        del file_bytes
 
     if not bill_text or len(bill_text.strip()) < 10:
         return JSONResponse(status_code=400, content={"error": "Could not extract meaningful text from this file. For PDFs, try a text-based export rather than a scanned image."})

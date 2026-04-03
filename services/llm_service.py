@@ -10,15 +10,30 @@ import config
 
 logger = logging.getLogger("cloud-carbon-advisor")
 
-_system_prompt: str | None = None
+_system_prompt_template: str | None = None
+_client: anthropic.AsyncAnthropic | None = None
 
 
-def _get_system_prompt() -> str:
-    global _system_prompt
-    if _system_prompt is None:
+def _get_client() -> anthropic.AsyncAnthropic:
+    global _client
+    if _client is None:
+        _client = anthropic.AsyncAnthropic(api_key=config.ANTHROPIC_API_KEY)
+    return _client
+
+
+def _get_system_prompt_template() -> str:
+    global _system_prompt_template
+    if _system_prompt_template is None:
         prompt_path = Path(__file__).parent.parent / "prompts" / "analysis_system_prompt.txt"
-        _system_prompt = prompt_path.read_text()
-    return _system_prompt
+        _system_prompt_template = prompt_path.read_text()
+    return _system_prompt_template
+
+
+def _build_system_prompt(reference_data: dict) -> str:
+    """Build system prompt with reference data injected. Returns a new string each time."""
+    template = _get_system_prompt_template()
+    ref_json = json.dumps(reference_data, indent=2) if reference_data else "{}"
+    return template.replace("{reference_data}", ref_json)
 
 
 async def analyze_bill(
@@ -31,13 +46,8 @@ async def analyze_bill(
     Yields markdown text chunks. Checks for client disconnect between chunks
     and cancels the API call if the client has gone away.
     """
-    system_prompt = _get_system_prompt()
-
-    # Inject reference data into prompt
-    ref_json = json.dumps(reference_data, indent=2) if reference_data else "{}"
-    system_prompt = system_prompt.replace("{reference_data}", ref_json)
-
-    client = anthropic.AsyncAnthropic(api_key=config.ANTHROPIC_API_KEY)
+    system_prompt = _build_system_prompt(reference_data)
+    client = _get_client()
 
     user_message = f"Here is the cloud bill to analyze:\n\n{bill_text}"
 
@@ -52,14 +62,12 @@ async def analyze_bill(
             messages=[{"role": "user", "content": user_message}],
         ) as stream:
             async for text in stream.text_stream:
-                # Check if client disconnected
                 if await request.is_disconnected():
                     logger.info("Client disconnected, cancelling stream")
                     break
 
                 yield text
 
-            # Get final token counts from the stream
             message = await stream.get_final_message()
             input_tokens = message.usage.input_tokens
             output_tokens = message.usage.output_tokens
