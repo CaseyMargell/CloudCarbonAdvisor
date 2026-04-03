@@ -73,6 +73,7 @@ async def index(request: Request):
         "contact_url": config.CONTACT_URL,
         "bmac_url": config.BMAC_URL,
         "github_url": config.GITHUB_URL,
+        "max_file_size_mb": config.MAX_FILE_SIZE_MB,
     })
 
 
