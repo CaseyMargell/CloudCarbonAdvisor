@@ -1,0 +1,36 @@
+/* Drag-over state for file upload zone */
+#drop-zone.drag-over {
+    border-color: #0d9488;
+    background-color: rgba(13, 148, 136, 0.05);
+}
+
+/* CSS-only spinner */
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #0d9488;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Prose styling for markdown results */
+#results-content h1 { font-size: 1.75rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #111827; }
+#results-content h2 { font-size: 1.375rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.625rem; color: #111827; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.375rem; }
+#results-content h3 { font-size: 1.125rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; color: #1f2937; }
+#results-content p { margin-bottom: 0.75rem; line-height: 1.7; color: #374151; }
+#results-content ul, #results-content ol { margin-bottom: 0.75rem; padding-left: 1.5rem; color: #374151; }
+#results-content li { margin-bottom: 0.375rem; line-height: 1.6; }
+#results-content strong { color: #111827; }
+#results-content table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+#results-content th { background: #f9fafb; text-align: left; padding: 0.625rem 0.75rem; border: 1px solid #e5e7eb; font-weight: 600; color: #374151; }
+#results-content td { padding: 0.625rem 0.75rem; border: 1px solid #e5e7eb; color: #4b5563; }
+#results-content tr:nth-child(even) { background: #f9fafb; }
+#results-content code { background: #f3f4f6; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.875em; }
+#results-content pre { background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin: 1rem 0; }
+#results-content pre code { background: none; padding: 0; color: inherit; }
+#results-content blockquote { border-left: 3px solid #0d9488; padding-left: 1rem; color: #6b7280; margin: 1rem 0; }
