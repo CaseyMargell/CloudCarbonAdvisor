@@ -52,6 +52,7 @@ async def add_security_headers(request: Request, call_next):
     )
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
 
@@ -112,8 +113,11 @@ async def analyze(request: Request, file: UploadFile = File(...)):
     # Extract text, then free file bytes
     try:
         bill_text = await extract_text(file.filename or "unknown", file_bytes)
+    except ValueError as e:
+        logger.warning("File extraction failed (user error): %s", e)
+        return JSONResponse(status_code=400, content={"error": str(e)})
     except Exception as e:
-        logger.error("File extraction failed: %s", e)
+        logger.error("File extraction failed (unexpected): %s", e)
         return JSONResponse(status_code=400, content={"error": "Unable to read this file. Try a different format or re-export."})
     finally:
         del file_bytes
@@ -121,13 +125,11 @@ async def analyze(request: Request, file: UploadFile = File(...)):
     if not bill_text or len(bill_text.strip()) < 10:
         return JSONResponse(status_code=400, content={"error": "Could not extract meaningful text from this file. For PDFs, try a text-based export rather than a scanned image."})
 
-    # Stream analysis
+    # Stream analysis — send delta chunks, client accumulates
     async def event_stream():
         try:
-            accumulated = ""
             async for chunk in analyze_bill(bill_text, reference_data, request):
-                accumulated += chunk
-                yield format_sse("chunk", {"content": accumulated})
+                yield format_sse("chunk", {"content": chunk})
 
             yield format_sse("done", {})
         except Exception as e:

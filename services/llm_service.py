@@ -68,9 +68,14 @@ async def analyze_bill(
 
                 yield text
 
-            message = await stream.get_final_message()
-            input_tokens = message.usage.input_tokens
-            output_tokens = message.usage.output_tokens
+            # Only get final message if stream completed normally (not cancelled)
+            if not await request.is_disconnected():
+                try:
+                    message = await stream.get_final_message()
+                    input_tokens = message.usage.input_tokens
+                    output_tokens = message.usage.output_tokens
+                except Exception:
+                    pass  # Stream was cancelled, token counts unavailable
 
     except anthropic.APIStatusError as e:
         logger.error("Claude API error: %s %s", e.status_code, e.message)
