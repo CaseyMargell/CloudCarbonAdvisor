@@ -111,7 +111,7 @@
     </div>
 
     <div id="results-actions" class="hidden results-actions no-print" style="margin-top: 1.5rem;">
-        <button onclick="window.print()" class="btn-primary">Download as PDF</button>
+        <button id="download-btn" class="btn-primary">Download PDF Report</button>
         <a href="/" class="btn-secondary">Start over</a>
     </div>
 </div>
@@ -355,10 +355,16 @@
         }
     }
 
-    // --- Details button: second API call for detailed recommendations ---
-    detailsBtn.addEventListener('click', async function() {
-        if (!cachedBillText) return;
+    // --- Load details: reusable function, returns Promise that resolves when done ---
+    var detailsLoaded = false;
+    var detailsLoading = false;
 
+    async function loadDetails() {
+        if (detailsLoaded) return true;
+        if (detailsLoading) return false; // Already in progress
+        if (!cachedBillText) return false;
+
+        detailsLoading = true;
         detailsCta.classList.add('hidden');
         detailsContent.innerHTML = '';
 
@@ -371,16 +377,17 @@
             });
         } catch (err) {
             detailsContent.innerHTML = '<div class="stream-error">Network error loading details. <a href="/">Start over</a></div>';
-            return;
+            detailsLoading = false;
+            return false;
         }
 
         if (!response.ok) {
             try { var errData = await response.json(); detailsContent.innerHTML = '<div class="stream-error">' + (errData.error || 'Failed to load details.') + '</div>'; }
             catch (e) { detailsContent.innerHTML = '<div class="stream-error">Failed to load details.</div>'; }
-            return;
+            detailsLoading = false;
+            return false;
         }
 
-        // Stream details — same scanAndRender pattern as summary
         var dReader = response.body.getReader();
         var dDecoder = new TextDecoder();
         var dBuffer = '', dAccumulated = '';
@@ -462,6 +469,28 @@
                 }
             }
         }
+
+        detailsLoaded = true;
+        detailsLoading = false;
+        return true;
+    }
+
+    // "Get detailed recommendations" button
+    detailsBtn.addEventListener('click', function() { loadDetails(); });
+
+    // "Download PDF Report" button -- loads details first if needed, then prints
+    document.getElementById('download-btn').addEventListener('click', async function() {
+        var btn = this;
+        if (!detailsLoaded && cachedBillText) {
+            btn.textContent = 'Generating full report...';
+            btn.disabled = true;
+            await loadDetails();
+            btn.textContent = 'Download PDF Report';
+            btn.disabled = false;
+        }
+        // Open all <details> elements so they show in print
+        document.querySelectorAll('#details-content details').forEach(function(d) { d.open = true; });
+        window.print();
     });
 })();
 </script>
