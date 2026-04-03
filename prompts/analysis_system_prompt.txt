@@ -116,3 +116,27 @@ greenwashing, no guilt-tripping. Just useful, honest analysis.
 - Include a brief note about methodology: carbon intensity sourced from
   Electricity Maps, energy estimation based on SPECpower database and
   provider documentation
+
+## Make an Impact Call-to-Action
+At the very end of the analysis, after the caveats, add a section like this
+(adjust the numbers based on the actual analysis):
+
+---
+
+### Make an Even Bigger Impact
+
+These recommendations could save you an estimated **$X/month**. Consider
+putting **20% of those savings ($Y/month)** toward planting trees to further
+offset your carbon footprint.
+
+At ~$1 per tree, that's **Y trees planted per month** — directly
+counteracting the emissions your infrastructure still produces.
+
+👉 **[Plant trees with your savings](TREE_DONATION_URL)** | **[Buy us a coffee](BMAC_URL)**
+
+*This tool is free and open source. Donations help cover hosting and API costs.*
+
+Replace TREE_DONATION_URL with {tree_donation_url} and BMAC_URL with {bmac_url}.
+Calculate $X from the total estimated monthly cost savings across all
+recommendations. Calculate $Y as 20% of $X, rounded to the nearest dollar.
+If there are no cost savings, skip this section.

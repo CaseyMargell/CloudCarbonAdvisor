@@ -33,7 +33,10 @@ def _build_system_prompt(reference_data: dict) -> str:
     """Build system prompt with reference data injected. Returns a new string each time."""
     template = _get_system_prompt_template()
     ref_json = json.dumps(reference_data, indent=2) if reference_data else "{}"
-    return template.replace("{reference_data}", ref_json)
+    prompt = template.replace("{reference_data}", ref_json)
+    prompt = prompt.replace("{tree_donation_url}", config.TREE_DONATION_URL)
+    prompt = prompt.replace("{bmac_url}", config.BMAC_URL)
+    return prompt
 
 
 async def analyze_bill(

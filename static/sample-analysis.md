@@ -145,3 +145,15 @@ All items are **quick wins** (< 1 hour each).
 ---
 
 *Carbon intensity from EPA eGRID2023 and Cloud Carbon Footprint project. Energy estimates based on Intel/AMD TDP specifications and AWS PUE of 1.15. All estimates approximate ±20%.*
+
+---
+
+### Make an Even Bigger Impact
+
+These recommendations could save you an estimated **$350–400/month**. Consider putting **20% of those savings (~$75/month)** toward planting trees to further offset your carbon footprint.
+
+At ~$1 per tree, that's **75 trees planted per month** — directly counteracting the emissions your infrastructure still produces.
+
+👉 **[Plant trees with your savings](https://onetreeplanted.org/products/plant-trees)** | **[Buy us a coffee](https://buymeacoffee.com)**
+
+*This tool is free and open source. Donations help cover hosting and API costs.*
