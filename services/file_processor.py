@@ -61,6 +61,9 @@ def _extract_pdf_text(file_bytes: bytes) -> str:
 
 def _extract_csv_text(file_bytes: bytes, delimiter: str = ",") -> str:
     """Extract text from CSV/TSV using built-in csv module."""
+    if not file_bytes:
+        raise ValueError("Empty file")
+
     # Try common encodings
     text = None
     for encoding in ("utf-8", "utf-8-sig", "latin-1"):
