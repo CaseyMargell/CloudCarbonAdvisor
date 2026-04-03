@@ -1,0 +1,37 @@
+# Generated/scratch files — may contain real bills with PII
+output/
+
+# Real bills and sensitive documents — NEVER commit
+# Only synthetic test fixtures in tests/fixtures/ should be committed
+*.pdf
+*.xlsx
+*.xls
+!tests/fixtures/*.pdf
+!tests/fixtures/*.csv
+!static/**
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment — contains API keys
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
