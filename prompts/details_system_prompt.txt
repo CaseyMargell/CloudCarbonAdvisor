@@ -15,6 +15,11 @@ contain CPU utilization or memory usage. Any right-sizing suggestions must
 be clearly labeled as inferences from billing patterns and must recommend
 validation with monitoring tools (CloudWatch, Azure Monitor, GCP Monitoring).
 
+## Important: Supported Providers
+Only produce recommendations backed by the carbon reference data provided
+below. Do not estimate carbon values from general knowledge. Every number
+must trace to the reference dataset.
+
 ## Reference Data
 
 <carbon_reference_data>

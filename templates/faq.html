@@ -36,9 +36,15 @@
 <p>Your bill is processed in memory and immediately discarded. We don't store files, we don't use a database, and we don't set cookies. The bill text is sent to Claude AI (Anthropic) for analysis — Anthropic does not use API data for model training. See <a href="https://www.anthropic.com/policies/privacy" target="_blank" rel="noopener">Anthropic's privacy policy</a> for details.</p>
 
 <h2>Which cloud providers are supported?</h2>
-<p>We have detailed carbon reference data (region-level grid intensity, instance energy profiles) for <strong>AWS, Azure, and GCP</strong>, which gives the most precise estimates for those providers.</p>
-<p>However, the tool can analyze bills from <strong>any cloud provider</strong> -- including Oracle Cloud, DigitalOcean, Hetzner, OVHcloud, Alibaba Cloud, and others. The AI will interpret the bill format and provide recommendations using its knowledge of regional grid carbon intensity. The estimates may be less precise without provider-specific reference data, but the directional guidance (which regions are cleaner, which instance types are more efficient) is still valuable.</p>
-<p>We accept PDF and CSV bill exports from any provider.</p>
+<p>We support <strong>AWS, Azure, and GCP</strong> -- the three providers where we have verified carbon reference data to show our math. This covers approximately 67% of the cloud market.</p>
+<p>For each of these providers, our reference dataset includes:</p>
+<ul>
+    <li>Per-region grid carbon intensity (gCO2/kWh) from EPA eGRID, Cloud Carbon Footprint project, and Google's published sustainability data</li>
+    <li>Provider-specific PUE (datacenter overhead) values from sustainability reports</li>
+    <li>Instance family energy profiles (TDP) for ARM and x86 variants</li>
+</ul>
+<p>We intentionally do not support providers where we cannot verify the underlying carbon data. Every number in your report traces back to a cited source -- we don't estimate from general knowledge.</p>
+<p>We accept PDF and CSV bill exports.</p>
 
 <h2>Is this open source?</h2>
 <p>Yes. The full source code is available on <a href="{{ github_url }}" target="_blank" rel="noopener">GitHub</a>. Contributions are welcome.</p>
