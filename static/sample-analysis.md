@@ -154,6 +154,6 @@ These recommendations could save you an estimated **$350–400/month**. Consider
 
 At ~$1 per tree, that's **75 trees planted per month** — directly counteracting the emissions your infrastructure still produces.
 
-👉 **[Plant trees with your savings](https://onetreeplanted.org/products/plant-trees)** | **[Buy us a coffee](https://buymeacoffee.com)**
+👉 **[Plant trees with your savings](https://linktr.ee/chatgptree.ai)** | **[Buy us a coffee](https://buymeacoffee.com)**
 
 *This tool is free and open source. Donations help cover hosting and API costs.*

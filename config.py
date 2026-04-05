@@ -14,7 +14,7 @@ CONTACT_URL = os.getenv("CONTACT_URL", "")
 CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", "cmargell@gmail.com")
 BMAC_URL = os.getenv("BMAC_URL", "")
 GITHUB_URL = os.getenv("GITHUB_URL", "")
-TREE_DONATION_URL = os.getenv("TREE_DONATION_URL", "https://onetreeplanted.org/products/plant-trees")
+TREE_DONATION_URL = os.getenv("TREE_DONATION_URL", "https://linktr.ee/chatgptree.ai")
 
 ALLOWED_EXTENSIONS = {".pdf", ".csv", ".tsv"}
 MAX_PDF_PAGES = 50
