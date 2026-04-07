@@ -16,6 +16,10 @@ BMAC_URL = os.getenv("BMAC_URL", "")
 GITHUB_URL = os.getenv("GITHUB_URL", "")
 TREE_DONATION_URL = os.getenv("TREE_DONATION_URL", "https://linktr.ee/chatgptree.ai")
 
+# Root path for serving behind a reverse proxy (e.g., "/cloud-carbon-advisor")
+# Leave empty when serving at the domain root
+ROOT_PATH = os.getenv("ROOT_PATH", "").rstrip("/")
+
 ALLOWED_EXTENSIONS = {".pdf", ".csv", ".tsv"}
 MAX_PDF_PAGES = 50
 MIN_PDF_TEXT_LENGTH = 200

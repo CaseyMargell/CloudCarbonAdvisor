@@ -70,6 +70,7 @@ def format_sse(event: str, data: dict) -> str:
 def _base_context() -> dict:
     """Shared template context for all pages."""
     return {
+        "root_path": config.ROOT_PATH,
         "contact_url": config.CONTACT_URL,
         "contact_email": config.CONTACT_EMAIL,
         "bmac_url": config.BMAC_URL,

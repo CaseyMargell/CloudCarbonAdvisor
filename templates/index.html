@@ -112,7 +112,7 @@
 
     <div id="results-actions" class="hidden results-actions no-print" style="margin-top: 1.5rem;">
         <button id="download-btn" class="btn-primary">Download PDF Report</button>
-        <a href="/" class="btn-secondary">Start over</a>
+        <a href="{{ root_path }}/" class="btn-secondary">Start over</a>
     </div>
 </div>
 
@@ -123,7 +123,7 @@
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
     </svg>
     <p id="error-message"></p>
-    <a href="/">Start over</a>
+    <a href="{{ root_path }}/">Start over</a>
 </div>
 {% endblock %}
 
@@ -145,6 +145,7 @@
     var errorMessage = document.getElementById('error-message');
 
     var MAX_SIZE = {{ max_file_size_mb }} * 1024 * 1024;
+    var ROOT = '{{ root_path }}';
     var cachedBillText = null; // Stored from context event for details call
 
     marked.setOptions({ breaks: true, gfm: true });
@@ -223,7 +224,7 @@
         formData.append('file', file);
 
         var response;
-        try { response = await fetch('/api/analyze', { method: 'POST', body: formData }); }
+        try { response = await fetch(ROOT + '/api/analyze', { method: 'POST', body: formData }); }
         catch (err) { showError('Network error. Please check your connection and try again.'); return; }
 
         if (!response.ok) {
@@ -355,7 +356,7 @@
                             if (accumulated) {
                                 var errDiv = document.createElement('div');
                                 errDiv.className = 'stream-error';
-                                errDiv.innerHTML = (data.message || 'Analysis was interrupted.') + ' <a href="/">Start over</a>';
+                                errDiv.innerHTML = (data.message || 'Analysis was interrupted.') + ' <a href="' + ROOT + '/">Start over</a>';
                                 resultsContent.appendChild(errDiv);
                             } else {
                                 showError(data.message || 'Something went wrong.');
@@ -382,13 +383,13 @@
 
         var response;
         try {
-            response = await fetch('/api/analyze/details', {
+            response = await fetch(ROOT + '/api/analyze/details', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ bill_text: cachedBillText })
             });
         } catch (err) {
-            detailsContent.innerHTML = '<div class="stream-error">Network error loading details. <a href="/">Start over</a></div>';
+            detailsContent.innerHTML = '<div class="stream-error">Network error loading details. <a href="' + ROOT + '/">Start over</a></div>';
             detailsLoading = false;
             return false;
         }

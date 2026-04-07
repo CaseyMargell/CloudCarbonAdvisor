@@ -4,21 +4,21 @@
 
 {% block content %}
 <div class="sample-banner">
-    This is a sample analysis generated from a real AWS bill. <a href="/">Upload your own bill</a> to get personalized recommendations.
+    This is a sample analysis generated from a real AWS bill. <a href="{{ root_path }}/">Upload your own bill</a> to get personalized recommendations.
 </div>
 
 <div id="results-content"></div>
 
 <div class="results-actions no-print" style="margin-top: 2rem;">
     <button onclick="window.print()" class="btn-primary">Download as PDF</button>
-    <a href="/" class="btn-secondary">Analyze your own bill</a>
+    <a href="{{ root_path }}/" class="btn-secondary">Analyze your own bill</a>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
 marked.setOptions({ breaks: true, gfm: true });
-fetch('/static/sample-analysis.md')
+fetch('{{ root_path }}/static/sample-analysis.md')
     .then(function(r) { return r.text(); })
     .then(function(md) {
         document.getElementById('results-content').innerHTML = DOMPurify.sanitize(marked.parse(md));
