@@ -347,8 +347,14 @@
                                 last.el.innerHTML = DOMPurify.sanitize(marked.parse(accumulated.substring(last.startIdx)));
                             }
                             if (progressEl) progressEl.remove();
-                            if (cachedBillText) detailsCta.classList.remove('hidden');
-                            staticFooter.classList.remove('hidden');
+                            // If the LLM detected this isn't a bill, hide details/download
+                            var isNotBill = accumulated.indexOf('Not a Cloud Bill') !== -1;
+                            if (isNotBill) {
+                                document.getElementById('download-btn').classList.add('hidden');
+                            } else {
+                                if (cachedBillText) detailsCta.classList.remove('hidden');
+                                staticFooter.classList.remove('hidden');
+                            }
                             resultsActions.classList.remove('hidden');
 
                         } else if (eventType === 'error') {
