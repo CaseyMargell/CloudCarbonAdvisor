@@ -1,0 +1,21 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+<rect width="1200" height="630" fill="#f9fafb"/>
+<circle cx="920" cy="315" r="220" fill="none" stroke="#0d9488" stroke-width="0.5" opacity="0.15"/>
+<circle cx="920" cy="315" r="280" fill="none" stroke="#0d9488" stroke-width="0.5" opacity="0.08"/>
+<circle cx="920" cy="315" r="340" fill="none" stroke="#0d9488" stroke-width="0.5" opacity="0.04"/>
+<g transform="translate(860, 255) scale(5)" stroke="#0d9488" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6">
+<path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+</g>
+<text x="80" y="260" font-family="system-ui, -apple-system, sans-serif" font-size="56" font-weight="600" fill="#111827" letter-spacing="-1">Cloud Carbon</text>
+<text x="80" y="330" font-family="system-ui, -apple-system, sans-serif" font-size="56" font-weight="600" fill="#111827" letter-spacing="-1">Advisor</text>
+<line x1="80" y1="360" x2="260" y2="360" stroke="#0d9488" stroke-width="3"/>
+<text x="80" y="405" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="400" fill="#4b5563">Upload your cloud bill.</text>
+<text x="80" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="400" fill="#4b5563">Get carbon reduction recommendations in 60 seconds.</text>
+<rect x="80" y="480" width="100" height="32" rx="4" fill="none" stroke="#0d9488" stroke-width="1" opacity="0.5"/>
+<text x="93" y="501" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="500" fill="#0d9488" letter-spacing="1">FREE</text>
+<rect x="200" y="480" width="160" height="32" rx="4" fill="none" stroke="#0d9488" stroke-width="1" opacity="0.5"/>
+<text x="213" y="501" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="500" fill="#0d9488" letter-spacing="1">OPEN SOURCE</text>
+<rect x="380" y="480" width="180" height="32" rx="4" fill="none" stroke="#0d9488" stroke-width="1" opacity="0.5"/>
+<text x="393" y="501" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="500" fill="#0d9488" letter-spacing="1">NO DATA STORED</text>
+<text x="80" y="590" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="400" fill="#9ca3af">caseymargell.com/cloud-carbon-advisor</text>
+</svg>
