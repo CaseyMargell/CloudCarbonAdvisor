@@ -15,7 +15,9 @@ CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", "cmargell@gmail.com")
 BMAC_URL = os.getenv("BMAC_URL", "")
 GITHUB_URL = os.getenv("GITHUB_URL", "")
 TREE_DONATION_URL = os.getenv("TREE_DONATION_URL", "https://linktr.ee/chatgptree.ai")
-SITE_URL = os.getenv("SITE_URL", "https://caseymargell.com")
+# Base URL for OG meta tags (social crawlers need absolute URLs).
+# Point directly at Railway to avoid proxy hop + cold start timeout.
+SITE_URL = os.getenv("SITE_URL", "https://cloudcarbonadvisor-production.up.railway.app")
 
 # Root path for serving behind a reverse proxy (e.g., "/cloud-carbon-advisor")
 # Leave empty when serving at the domain root
