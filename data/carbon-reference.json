@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-02T00:00:00Z",
+  "last_updated": "2026-04-08T00:00:00Z",
   "data_sources": {
     "carbon_intensity": "Cloud Carbon Footprint project (EPA eGRID2023, EEA, IEA), cross-referenced with CarbonFootprint.com 2024 factors and Electricity Maps methodology",
     "instance_energy": "SPECpower database, Intel/AMD/Ampere published TDP values, cloud provider documentation",
@@ -64,24 +64,24 @@
         },
         "eu-west-2": {
           "name": "London",
-          "grid_carbon_intensity_gco2_kwh": 207.0,
-          "renewable_percentage": 52,
-          "source": "CarbonFootprint.com 2024 UK factor (0.207 kgCO2/kWh). CCF uses 305 which appears outdated due to rapid UK grid decarbonization.",
-          "notes": "UK National Grid has decarbonized rapidly. Growing offshore wind and nuclear. Down from ~400 in 2015."
+          "grid_carbon_intensity_gco2_kwh": 150,
+          "renewable_percentage": 55,
+          "source": "National Grid ESO 2024 annual average (125 gCO2/kWh measured). Using 150 as conservative estimate. Wind now 30% of UK generation, coal below 1%.",
+          "notes": "UK grid decarbonized rapidly. National Grid ESO measured 125 gCO2/kWh in 2024. Updated April 2026."
         },
         "eu-west-3": {
           "name": "Paris",
-          "grid_carbon_intensity_gco2_kwh": 52.0,
-          "renewable_percentage": 27,
-          "source": "CarbonFootprint.com 2024 France factor (0.052 kgCO2/kWh). CCF uses 74 gCO2/kWh.",
-          "notes": "French grid dominated by nuclear power (~70%). Very low carbon. Among the cleanest major grids in Europe."
+          "grid_carbon_intensity_gco2_kwh": 30,
+          "renewable_percentage": 28,
+          "source": "RTE France 2024 annual review (21.7 gCO2eq/kWh direct, ~30 lifecycle). Nuclear 67%, hydro 14%, CO2-free 95% of mix.",
+          "notes": "2024 was a record year for France -- nuclear recovery to 361.7 TWh, hydro highest since 2013. Updated April 2026."
         },
         "eu-central-1": {
           "name": "Frankfurt",
-          "grid_carbon_intensity_gco2_kwh": 368.0,
-          "renewable_percentage": 46,
-          "source": "CCF (0.000368 mtCO2/kWh). CarbonFootprint.com reports 380 gCO2/kWh for Germany. Using CCF value.",
-          "notes": "German grid, Energiewende transition ongoing but still significant coal/lignite generation post-nuclear phase-out."
+          "grid_carbon_intensity_gco2_kwh": 310,
+          "renewable_percentage": 50,
+          "source": "Ember Global Electricity Review 2025 (~298 gCO2/kWh for Germany 2024), CarbonFootprint.com 2025 (380). Conservative estimate of 310.",
+          "notes": "German grid continuing to decarbonize -- coal declining, renewables growing. Updated April 2026."
         },
         "eu-north-1": {
           "name": "Stockholm",
@@ -198,21 +198,21 @@
         },
         "uksouth": {
           "name": "UK South (London)",
-          "grid_carbon_intensity_gco2_kwh": 207.0,
-          "renewable_percentage": 52,
-          "notes": "UK National Grid. CarbonFootprint.com 2024 factor."
+          "grid_carbon_intensity_gco2_kwh": 150,
+          "renewable_percentage": 55,
+          "notes": "UK National Grid. National Grid ESO 2024 measured 125 gCO2/kWh. Conservative 150. Updated April 2026."
         },
         "germanywestcentral": {
           "name": "Germany West Central (Frankfurt)",
-          "grid_carbon_intensity_gco2_kwh": 368.0,
-          "renewable_percentage": 46,
-          "notes": "German grid. CCF value."
+          "grid_carbon_intensity_gco2_kwh": 310,
+          "renewable_percentage": 50,
+          "notes": "German grid. Ember 2024 ~298, conservative 310. Updated April 2026."
         },
         "francecentral": {
           "name": "France Central (Paris)",
-          "grid_carbon_intensity_gco2_kwh": 52.0,
-          "renewable_percentage": 27,
-          "notes": "French nuclear-dominated grid. CarbonFootprint.com 2024 factor."
+          "grid_carbon_intensity_gco2_kwh": 30,
+          "renewable_percentage": 28,
+          "notes": "French grid. RTE 2024: 21.7 direct, ~30 lifecycle. Updated April 2026."
         },
         "swedencentral": {
           "name": "Sweden Central (Gavle)",
@@ -298,15 +298,15 @@
         },
         "europe-west2": {
           "name": "London",
-          "grid_carbon_intensity_gco2_kwh": 207.0,
-          "renewable_percentage": 52,
-          "notes": "UK National Grid. CarbonFootprint.com 2024 factor."
+          "grid_carbon_intensity_gco2_kwh": 150,
+          "renewable_percentage": 55,
+          "notes": "UK National Grid. ESO 2024 measured 125, conservative 150. Updated April 2026."
         },
         "europe-west3": {
           "name": "Frankfurt",
-          "grid_carbon_intensity_gco2_kwh": 368.0,
-          "renewable_percentage": 46,
-          "notes": "German grid. CCF value."
+          "grid_carbon_intensity_gco2_kwh": 310,
+          "renewable_percentage": 50,
+          "notes": "German grid. Ember 2024 ~298, conservative 310. Updated April 2026."
         },
         "europe-west4": {
           "name": "Netherlands",
