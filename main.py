@@ -76,7 +76,7 @@ def _base_context() -> dict:
         "bmac_url": config.BMAC_URL,
         "github_url": config.GITHUB_URL,
         "tree_donation_url": config.TREE_DONATION_URL,
-        "site_url": config.SITE_URL,
+        "og_base_url": config.OG_BASE_URL,
     }
 
 
