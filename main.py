@@ -85,7 +85,8 @@ async def index(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={**_base_context(), "max_file_size_mb": config.MAX_FILE_SIZE_MB},
+        context={**_base_context(), "max_file_size_mb": config.MAX_FILE_SIZE_MB,
+                 "reference_data_updated": reference_data.get("last_updated", "")},
     )
 
 
